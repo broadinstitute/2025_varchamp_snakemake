@@ -8,4 +8,6 @@ PIPELINE = config["pipeline"]
 
 rule all:
     input:
-        f"outputs/batch_profiles/{BATCH}/{PIPELINE}.parquet"
+        f"outputs/results/{BATCH}/{PIPELINE}/feat_importance.csv",
+        f"outputs/results/{BATCH}/{PIPELINE}/classifier_info.csv",
+        f"outputs/results/{BATCH}/{PIPELINE}/predictions.parquet"

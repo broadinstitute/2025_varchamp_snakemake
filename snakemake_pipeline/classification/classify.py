@@ -134,7 +134,7 @@ def get_classifier_features(dframe: pd.DataFrame, protein_feat: bool):
         feat_col = [
             i
             for i in feat_col
-            if ("GFP" not in i) and ("Brightfield" not in i) and ("AGP" not in i)
+            if ("GFP" not in i) and ("Brightfield" not in i) ## and ("AGP" not in i), test without AGP features
         ]
 
     dframe = pd.concat([dframe[meta_col], dframe[feat_col]], axis=1)
@@ -416,7 +416,7 @@ def run_classify_workflow(
     info_output_path: str,
     preds_output_path: str,
     cc_threshold: int,
-    use_gpu: Union[str, None] = "6,7",
+    use_gpu: Union[str, None] = "0,1",
 ):
     """
     Run workflow for single-cell classification
