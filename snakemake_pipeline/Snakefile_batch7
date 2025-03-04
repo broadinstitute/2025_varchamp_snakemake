@@ -1,0 +1,11 @@
+configfile: "./inputs/configs/2024_01_23_Batch_7.json"
+
+include: "rules/common.smk"
+include: "rules/preprocess.smk"
+
+BATCH = config["Metadata_Batch"]
+PIPELINE = config["pipeline"]
+
+rule all:
+    input:
+        f"outputs/batch_profiles/{BATCH}/{PIPELINE}.parquet"
