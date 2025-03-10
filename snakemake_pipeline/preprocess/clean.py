@@ -1,7 +1,6 @@
 import sys
 sys.path.append('..')
 from utils import find_feat_cols, find_meta_cols
-
 import pandas as pd 
 import polars as pl
 import logging
@@ -19,6 +18,7 @@ def clip_features(dframe, threshold):
         logger.info(f'Clipping {counts.sum()} values in {len(counts)} columns')
         dframe.loc[:, feat_cols].clip(-threshold, threshold, inplace=True)
     return dframe
+
 
 def drop_outlier_feats(dframe: pd.DataFrame, threshold: float):
     '''Remove columns with 1 percentile of absolute values larger than threshold'''
@@ -39,6 +39,7 @@ def outlier_removal(input_path: str, output_path: str):
     dframe = clip_features(dframe, threshold=1e2)
     dframe.to_parquet(output_path)
 
+
 def clip_features_polar(lframe: pl.LazyFrame, threshold) -> pl.LazyFrame:
     '''Clip feature values to a given magnitude'''
     feat_cols = find_feat_cols(lframe)
@@ -54,6 +55,7 @@ def clip_features_polar(lframe: pl.LazyFrame, threshold) -> pl.LazyFrame:
         )
     )
     return clipped_frame
+
 
 def drop_outlier_feats_polar(lframe: pl.LazyFrame, threshold: float) -> pl.LazyFrame:
     """
@@ -73,6 +75,7 @@ def drop_outlier_feats_polar(lframe: pl.LazyFrame, threshold: float) -> pl.LazyF
         pl.col(meta_cols), pl.col(selected_col)
     )
     return lframe_filtered
+
 
 def outlier_removal_polars(input_path: str, output_path: str):
     '''Remove outliers'''

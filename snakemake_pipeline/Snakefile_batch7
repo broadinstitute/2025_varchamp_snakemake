@@ -2,12 +2,11 @@ configfile: "./inputs/configs/2024_01_23_Batch_7.json"
 
 include: "rules/common.smk"
 include: "rules/preprocess.smk"
+include: "rules/analysis.smk"
 
 BATCH = config["Metadata_Batch"]
 PIPELINE = config["pipeline"]
 
 rule all:
     input:
-        f"outputs/results/{BATCH}/{PIPELINE}/feat_importance.csv",
-        f"outputs/results/{BATCH}/{PIPELINE}/classifier_info.csv",
-        f"outputs/results/{BATCH}/{PIPELINE}/predictions.parquet"
+        f"outputs/analyses/{BATCH}/{PIPELINE}/metrics_summary.csv"

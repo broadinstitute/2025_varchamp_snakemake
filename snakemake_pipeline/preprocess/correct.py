@@ -1,8 +1,8 @@
 """Perform correction before feature selection"""
 from tqdm.contrib.concurrent import thread_map
-
 import pandas as pd
 import polars as pl
+
 
 def subtract_well_mean_polar(input_path: str, output_path: str):
     """Subtract the mean of each feature per well position using polar."""
@@ -11,6 +11,7 @@ def subtract_well_mean_polar(input_path: str, output_path: str):
     lf = lf.with_columns(pl.col(feature_cols) - pl.mean(feature_cols).over("Metadata_Well"))
     df_well_corrected = lf.collect().to_pandas()
     df_well_corrected.to_parquet(output_path, compression="gzip")
+
 
 def subtract_well_mean(input_path: str, output_path: str, parallel: bool = True):
     """Subtract the mean of each feature per well position."""

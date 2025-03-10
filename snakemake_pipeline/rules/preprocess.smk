@@ -3,6 +3,22 @@ import utils
 import classification
 
 
+rule drop_empty_wells:
+    input: 
+        "outputs/batch_profiles/{batch}/profiles.parquet",
+    output: 
+        "outputs/batch_profiles/{batch}/profiles_tcdropped.parquet",
+    benchmark:
+        "outputs/benchmarks/{batch}/profiles_tcdropped.bwa.benchmark.txt"
+    run:
+        preprocess.drop_empty_wells(
+            *input, 
+            *output, 
+            pert_col=config["transfection_col"], 
+            pert_name=config["trasfection_pert"]
+        )
+
+
 rule remove_nan:
     input:
         "outputs/batch_profiles/{batch}/{pipeline}.parquet"
@@ -17,22 +33,6 @@ rule remove_nan:
             *input, 
             *output, 
             cell_threshold=params.drop_threshold
-        )
-
-
-rule drop_empty_wells:
-    input: 
-        "outputs/batch_profiles/{batch}/profiles.parquet",
-    output: 
-        "outputs/batch_profiles/{batch}/profiles_tcdropped.parquet",
-    benchmark:
-        "outputs/benchmarks/{batch}/profiles_tcdropped.bwa.benchmark.txt"
-    run:
-        preprocess.drop_empty_wells(
-            *input, 
-            *output, 
-            pert_col=config["transfection_col"], 
-            pert_name=config["trasfection_pert"]
         )
 
 
@@ -55,7 +55,7 @@ rule plate_stats:
     output:
         "outputs/batch_profiles/{batch}/plate_stats.parquet"
     benchmark:
-        "benchmarks/plate_stats_{batch}.bwa.benchmark.txt"
+        "outputs/benchmarks/{batch}/plate_stats_{batch}.bwa.benchmark.txt"
     run:
         preprocess.compute_norm_stats_polar(*input, *output)
 
@@ -67,7 +67,7 @@ rule select_variant_feats:
     output:
         "outputs/batch_profiles/{batch}/{pipeline}_var.parquet",
     benchmark:
-        "benchmarks/{pipeline}_var_{batch}.bwa.benchmark.txt"
+        "outputs/benchmarks/{batch}/{pipeline}_var_{batch}.bwa.benchmark.txt"
     run:
         preprocess.select_variant_features_polars(*input, *output)
 
@@ -79,7 +79,7 @@ rule mad:
     output:
         "outputs/batch_profiles/{batch}/{pipeline}_mad.parquet"
     benchmark:
-        "benchmarks/{pipeline}_mad_{batch}.bwa.benchmark.txt"
+        "outputs/benchmarks/{batch}/{pipeline}_mad_{batch}.bwa.benchmark.txt"
     run:
         preprocess.robustmad(input[0], input[1], *output)
 
@@ -90,7 +90,7 @@ rule outlier_removal:
     output:
         "outputs/batch_profiles/{batch}/{pipeline}_outlier.parquet",
     benchmark:
-        "benchmarks/{pipeline}_outlier_{batch}.bwa.benchmark.txt"
+        "outputs/benchmarks/{batch}/{pipeline}_outlier_{batch}.bwa.benchmark.txt"
     run:
         preprocess.clean.outlier_removal_polars(*input, *output)
 
@@ -101,7 +101,7 @@ rule feat_select:
     output:
         "outputs/batch_profiles/{batch}/{pipeline}_featselect.parquet"
     benchmark:
-        "benchmarks/{pipeline}_feat_select_{batch}.bwa.benchmark.txt"
+        "outputs/benchmarks/{batch}/{pipeline}_feat_select_{batch}.bwa.benchmark.txt"
     run:
         preprocess.select_features(*input, *output)
 
@@ -119,7 +119,7 @@ rule filter_cells:
     run:
         preprocess.filter_cells(*input, *output, TC=params.TC, NC=params.NC, PC=params.PC, cPC=params.cPC)
 
-
+        
 rule classify:
     input:
         "outputs/batch_profiles/{batch}/{pipeline}.parquet",
@@ -128,6 +128,6 @@ rule classify:
         "outputs/results/{batch}/{pipeline}/classifier_info.csv",
         "outputs/results/{batch}/{pipeline}/predictions.parquet"
     benchmark:
-        "benchmarks/{pipeline}_classify_{batch}.bwa.benchmark.txt"
+        "outputs/benchmarks/{batch}/{pipeline}_classify_{batch}.bwa.benchmark.txt"
     run:
         classification.run_classify_workflow(*input, *output, config["cc_threshold"])
