@@ -172,7 +172,7 @@ cython_debug/
 
 
 ## ignore snakemake pipeline inputs & outputs
-snakemake_pipeline/inputs/
+snakemake_pipeline/inputs/single_cell_profiles/
 snakemake_pipeline/outputs/
 snakemake_pipeline/.snakemake/
 
