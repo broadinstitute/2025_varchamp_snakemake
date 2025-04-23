@@ -9,5 +9,7 @@
     "NC": ["RHEB", "MAPK9", "PRKACB", "SLIRP"],
     "PC": ["ALK", "ALK_Arg1275Gln", "PTK2B"],
     "cPC": ["KRAS", "PTK2B", "GHSR", "ABL1", "BRD4", "OPRM1", "RB1", "ADA", "WT PMP22", "LYN", "TNF", "CYP2A6", "CSK", "PAK1", "ALDH2", "CHRM3", "KCNQ2", "ALK T1151M", "PRKCE", "LPAR1", "PLP1"],
-    "cc_threshold": 20
+    "cc_threshold": 20,
+    "trn_imbal_thres": 3,
+    "min_num_classifier": 2
 }
