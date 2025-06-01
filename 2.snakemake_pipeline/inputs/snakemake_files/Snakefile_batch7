@@ -1,0 +1,13 @@
+## Should ONLY be run when located 8.2_updated_snakemake_pipeline
+configfile: "inputs/configs/2024_01_23_Batch_7.json"
+
+include: "rules/common.smk"
+include: "rules/preprocess.smk"
+include: "rules/analysis.smk"
+
+BATCH = config["Metadata_Batch"]
+PIPELINE = config["pipeline"]
+
+rule all:
+    input:
+        f"outputs/classification_analyses/{BATCH}/{PIPELINE}/metrics.csv"
