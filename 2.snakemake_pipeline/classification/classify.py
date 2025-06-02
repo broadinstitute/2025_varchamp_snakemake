@@ -781,7 +781,7 @@ def run_classify_workflow(
         ("CellID", pa.string()),
         ("Label", pa.int64()),
         ("Prediction", pa.float32()),
-        ("Metadata_Protein", pa.bool_()),
+        ("Metadata_Feature_Type", pa.string()),
         ("Metadata_Control", pa.bool_()),
     ])
     writer = pq.ParquetWriter(preds_output_path, schema, compression="gzip")
