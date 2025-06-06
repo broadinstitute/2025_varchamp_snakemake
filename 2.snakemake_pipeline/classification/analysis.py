@@ -22,6 +22,7 @@ def compute_metrics(group):
     prior = sum(y_true == 1) / len(y_true)
 
     class_ID = group["Classifier_ID"].unique()[0]
+    metadata_feat_type = group["Metadata_Feature_Type"].unique()[0]
 
     # Compute AUROC
     auroc = roc_auc_score(y_true, y_prob)
@@ -50,6 +51,7 @@ def compute_metrics(group):
         "Specificity": specificity,
         "Balanced_Accuracy": balanced_acc,
         "Classifier_ID": class_ID,
+        "Metadata_Feature_Type": metadata_feat_type
     }
 
 
@@ -73,7 +75,7 @@ def calculate_class_metrics(classifier_info: str, predictions: str, metrics_file
     preds = preds.with_columns(pl.lit(batch_id).alias("Batch")).collect()
     preds = preds.with_columns(
         pl.concat_str(
-            [pl.col("Classifier_ID"), pl.col("Metadata_Protein"), pl.col("Batch")],
+            [pl.col("Classifier_ID"), pl.col("Metadata_Feature_Type"), pl.col("Batch")],
             separator="_",
         ).alias("Full_Classifier_ID")
     )
@@ -92,7 +94,7 @@ def calculate_class_metrics(classifier_info: str, predictions: str, metrics_file
     metrics_df = pl.DataFrame(results)
 
     # Add classifier info and save
-    metrics_df = metrics_df.join(class_info, on="Classifier_ID")
+    metrics_df = metrics_df.join(class_info, on=["Classifier_ID","Metadata_Feature_Type"])
     metrics_df = metrics_df.with_columns(
         (
             pl.max_horizontal(["trainsize_0", "trainsize_1"])

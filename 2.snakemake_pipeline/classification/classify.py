@@ -122,7 +122,7 @@ def get_classifier_features(dframe: pd.DataFrame, feat_type: str):
         feat_col = [
             i
             for i in feat_col
-            if (feat_type in i)
+            if (feat_type.lower() in i.lower())
             and ("Brightfield" not in i) ## excluding Brightfield features
         ]
     else:
@@ -342,6 +342,7 @@ def experimental_runner(
     # process classifier info
     df_result = pd.concat(info_list, ignore_index=True)
     df_result["Metadata_Control"] = False
+    df_result["Metadata_Feature_Type"] = feat_type
 
     log_file.write(f"Finished running XGBboost classifiers w/ {feat_type} features on target variants.\n")
     log_file.write(f"===========================================================================\n\n")
@@ -459,6 +460,7 @@ def control_group_runner(
     # process classifier info
     df_result = pd.concat(info_list, ignore_index=True)
     df_result["Metadata_Control"] = True
+    df_result["Metadata_Feature_Type"] = feat_type
 
     log_file.write(f"Finished running XGBboost classifiers w/ {feat_type} features on control alleles.\n")
     log_file.write(f"===========================================================================\n\n")
@@ -607,6 +609,7 @@ def control_group_runner_fewer_rep(
     # process classifier info
     df_result = pd.concat(info_list, ignore_index=True)
     df_result["Metadata_Control"] = True
+    df_result["Metadata_Feature_Type"] = feat_type
 
     err_logger.write(f"Logging errors when running control experiments w/ {feat_type} features finished.\n")
     err_logger.write(f"==============================================================================\n\n")
@@ -745,6 +748,7 @@ def experimental_runner_plate_rep(
     # process classifier info
     df_result = pd.concat(info_list, ignore_index=True)
     df_result["Metadata_Control"] = False
+    df_result["Metadata_Feature_Type"] = feat_type
 
     err_logger.write(f"Logging errors when running real experiments w/ {feat_type} features finished.\n")
     err_logger.write(f"===========================================================================\n\n")

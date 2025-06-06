@@ -172,15 +172,14 @@ cython_debug/
 
 
 ## ignore snakemake pipeline inputs & outputs
-snakemake_pipeline/inputs/single_cell_profiles/
-snakemake_pipeline/outputs/
-snakemake_pipeline/.snakemake/
+**/inputs/single_cell_profiles/
+**/.snakemake/
 
 ## no logs
 snakemake_pipeline/runinfo/
 *.log
 
 ## Byte-compiled / optimized / DLL files
-snakemake_pipeline/__pycache__/
+**/__pycache__/
 snakemake_pipeline/*.py[cod]
 snakemake_pipeline/*$py.class

@@ -42,23 +42,25 @@ def __():
 
     letter_dict_rev = {v: k for k, v in letter_dict.items()}
     channel_dict_rev = {v: k for k, v in channel_dict.items()}
-    TIFF_IMG_DIR = "../inputs/cpg_imgs"
     PERCENTILE_ARRAY = np.array([25,50,75,80,90,95,99])
 
-    # p = argparse.ArgumentParser(__doc__)
-    # p.add_argument("--batch_list", help="batch to process")
-    # p.add_argument("--output_dir", type=str)
-    # p.add_argument("--workers", type=int, default=256, help="Number of parallel workers")
-    # args = p.parse_args()
-    # batch_list = args.batch_list
-    # output_dir = args.output_dir
-    # workers = args.workers
+    p = argparse.ArgumentParser(__doc__)
+    p.add_argument("--batch_list", help="batch to process")
+    p.add_argument("--input_dir", type=str)
+    p.add_argument("--output_dir", type=str)
+    p.add_argument("--workers", type=int, default=256, help="Number of parallel workers")
+    args = p.parse_args()
 
-    batch_list = "2024_01_23_Batch_7,2024_02_06_Batch_8,2025_03_17_Batch_15,2025_03_17_Batch_16"
+    batch_list = args.batch_list
+    TIFF_IMG_DIR = args.input_dir #"../inputs/cpg_imgs"
+    output_dir = args.output_dir
+    workers = args.workers
+
+    # batch_list = "2024_01_23_Batch_7,2024_02_06_Batch_8,2025_03_17_Batch_15,2025_03_17_Batch_16"
     # batch_list = "2024_12_09_Batch_11,2024_12_09_Batch_12"
-
-    output_dir = "../outputs/sum_stats_parquet"
-    workers = 128
+    # output_dir = "../outputs/sum_stats_parquet"
+    # workers = 128
+    
     batches = batch_list.split(",")
     return (
         PERCENTILE_ARRAY,
@@ -173,7 +175,7 @@ def __(
 
         if not tiff_imgs:
             # no images → fill with NaNs
-            output_dict.update({f"perc_{int(p*100)}": None for p in percentiles})
+            output_dict.update({f"perc_{int(p)}": None for p in percentiles})
             output_dict.update({"mean": None, "std": None})
             return output_dict
 
@@ -196,7 +198,7 @@ def __(
         # cumulative histogram for percentile lookup
         cum = np.cumsum(total_hist)
         pct_values = {
-            f"perc_{int(p*100)}": int(np.searchsorted(cum, total_n * p))
+            f"perc_{int(p)}": int(np.searchsorted(cum, total_n * (p/100)))
             for p in percentiles
         }
 
