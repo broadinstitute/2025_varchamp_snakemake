@@ -6,7 +6,6 @@ outputs = config["output_dir"]
 batch = config["Metadata_Batch"]
 plates = os.listdir(f"{inputs}/single_cell_profiles/{batch}/")
 
-
 rule parquet_convert:
     input:
         f"{inputs}/single_cell_profiles/{batch}/{{plate}}/{{plate}}.sqlite"
@@ -27,8 +26,8 @@ rule annotate:
     benchmark:
         f"{outputs}/benchmarks/{batch}/annotate_{{plate}}.bwa.benchmark.txt"
     run:
-        platemap = preprocess.get_platemap(f'{inputs}/metadata/platemaps/{wildcards.batch}/barcode_platemap.csv', f'{wildcards.plate}')
-        platemap_path = f"{inputs}/metadata/platemaps/{wildcards.batch}/platemap/{platemap}.txt"
+        platemap = preprocess.get_platemap(f'{inputs}/metadata/platemaps/{batch}/barcode_platemap.csv', f'{wildcards.plate}')
+        platemap_path = f"{inputs}/metadata/platemaps/{batch}/platemap/{platemap}.txt"
         preprocess.annotate_with_platemap(*input, platemap_path, *output)
 
 

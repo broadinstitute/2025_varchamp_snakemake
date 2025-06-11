@@ -1,13 +1,15 @@
 ## Should ONLY be run when located 8.2_updated_snakemake_pipeline
-configfile: "inputs/configs/2025_03_17_Batch_15.json"
+configfile: "/home/shenrunx/igvf/varchamp/2025_laval_submitted/2_individual_assay_results/imaging/2_analysis/1_snakemake_pipeline/1.run_snakemake_pipeline/configs/2025_03_17_Batch_15.json"
 
-include: "rules/common.smk"
-include: "rules/preprocess.smk"
-include: "rules/analysis.smk"
+include: "/home/shenrunx/igvf/varchamp/2025_laval_submitted/2_individual_assay_results/imaging/2_analysis/1_snakemake_pipeline/2025_varchamp_snakemake/2.snakemake_pipeline/rules/common.smk"
+include: "/home/shenrunx/igvf/varchamp/2025_laval_submitted/2_individual_assay_results/imaging/2_analysis/1_snakemake_pipeline/2025_varchamp_snakemake/2.snakemake_pipeline/rules/preprocess.smk"
+include: "/home/shenrunx/igvf/varchamp/2025_laval_submitted/2_individual_assay_results/imaging/2_analysis/1_snakemake_pipeline/2025_varchamp_snakemake/2.snakemake_pipeline/rules/analysis.smk"
 
 BATCH = config["Metadata_Batch"]
 PIPELINE = config["pipeline"]
+inputs = config["input_dir"]
+outputs = config["output_dir"]
 
 rule all:
     input:
-        f"outputs/classification_analyses/{BATCH}/{PIPELINE}/metrics.csv"
+        f"{outputs}/classification_analyses/{BATCH}/{PIPELINE}/metrics.csv"

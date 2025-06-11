@@ -825,7 +825,6 @@ def run_classify_workflow(
     dframe = add_control_annot(dframe)
     dframe = dframe[~dframe["Metadata_control"].isna()]
 
-
     ## store the classifier feat_importance and classification_res
     feat_import_dfs, class_res_dfs = [], [] 
     ## Split data into experimental df with var and ref alleles
@@ -851,8 +850,11 @@ def run_classify_workflow(
             print("Dropping low cell count wells in ONLY the control alleles on the same plate:\n")
             # Filter out wells with fewer than the cell count threhsold
             df_control = drop_low_cc_wells(df_control, cc_threshold, log_file)
-            
+            print("Check ctrl df:")
+            print(df_control)
+
             for feat in FEAT_TYPE_SET:
+                print(feat)
                 df_feat_pro_con, df_result_pro_con = control_group_runner(
                     df_control, pq_writer=writer, log_file=log_file, feat_type=feat
                 )

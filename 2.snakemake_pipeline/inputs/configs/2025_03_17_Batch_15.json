@@ -1,8 +1,9 @@
 {
+    "input_dir": "/home/shenrunx/igvf/varchamp/2025_laval_submitted/2_individual_assay_results/imaging/1_inputs/1_snakemake_pipeline/inputs",
+    "output_dir": "/home/shenrunx/igvf/varchamp/2025_laval_submitted/2_individual_assay_results/imaging/3_outputs/1_snakemake_pipeline/4.sm_pipeline_outputs_tmp",
     "Metadata_Batch": "2025_03_17_Batch_15",
-    "cell_count_col": "Metadata_Object_Count",
-    "parallel": true,
     "pipeline": "profiles_tcdropped_filtered_var_mad_outlier_featselect_filtcells",
+    "cell_count_col": "Metadata_Object_Count",
     "transfection_col": "Metadata_node_type",
     "trasfection_pert": ["TC"],
     "TC": ["EGFP"],
@@ -12,5 +13,6 @@
     "cc_threshold": 20,
     "plate_layout": "single_rep",
     "trn_imbal_thres": 3,
-    "min_num_classifier": 2
+    "min_num_classifier": 2,
+    "parallel": true
 }

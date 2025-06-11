@@ -6,7 +6,8 @@
 AWS_IMG_PATH="s3://cellpainting-gallery/cpg0020-varchamp/broad/images"
 AWS_WORKSPACE_PATH="s3://cellpainting-gallery/cpg0020-varchamp/broad/workspace"
 
-## local paths for store the aws cpg data
+## Download the aws cpg data to your local directory
+## To be replaced by user's choices 
 CPG_IMG_PATH="./1.image_preprocess_qc/inputs/cpg_imgs" ## symbolic link to /data/shenrunx/igvf/varchamp/2021_09_01_VarChAMP_imgs
 SNAKEMAKE_INPUT_PATH="./2.snakemake_pipeline/inputs"
 BATCHES="2024_01_23_Batch_7 2024_02_06_Batch_8 2024_12_09_Batch_11 2024_12_09_Batch_12 2025_03_17_Batch_15 2025_03_17_Batch_16"
