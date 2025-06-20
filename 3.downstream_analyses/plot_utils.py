@@ -11,6 +11,14 @@ sys.path.append("../1.image_preprocess_qc/scripts/")
 from img_utils import *
 
 
+clinvar_palette_set2 = sns.color_palette("Set2")
+clinvar_palette_set2[0], clinvar_palette_set2[1], clinvar_palette_set2[2], clinvar_palette_set2[3], clinvar_palette_set2[4], clinvar_palette_set2[5], clinvar_palette_set2[7] = \
+clinvar_palette_set2[1], clinvar_palette_set2[4], clinvar_palette_set2[3], clinvar_palette_set2[2], clinvar_palette_set2[0], clinvar_palette_set2[7], clinvar_palette_set2[5]
+clinvar_category = ['1_Pathogenic', '2_Benign', '3_Conflicting', '4_VUS', '5_Others', '6_No_ClinVar']
+palette_dict = {
+    "clinvar": dict(zip(clinvar_category, clinvar_palette_set2[:7]))
+}
+
 ## Letter dict to convert well position to img coordinates
 letter_dict = {
     "A": "01",
@@ -55,6 +63,26 @@ color_map = {
     '': 'white'  # White for missing wells
 }
 
+
+def plot_top_n_important_feat(df, feat_cols, n=10, ax=None, title=""):
+    # Calculate mean and standard deviation for each column
+    column_stats = df[feat_cols].agg(['mean', 'std']).T
+    # Sort columns by the sum of mean and std in descending order
+    sorted_columns = column_stats.sort_values(by=["mean"], ascending=False)
+    sorted_columns = sorted_columns.head(n)
+    # display(sorted_columns)
+
+    # Plot mean and std for each column
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(5, 4))
+    ax.barh(y=sorted_columns.index, width=sorted_columns["mean"], color='skyblue') ## yerr=sorted_columns["std"], capsize=5, edgecolor='black'
+    ax.set_yticks(range(len(sorted_columns.index)))
+    ax.set_yticklabels(sorted_columns.index, rotation=0, fontsize=12)
+    # ax.set_xlabel("Mean")
+    ax.set_title(f"Top {n} Features Importance Mean {title}")
+    ax.axvline(x=0.01, color='r', linestyle='--')
+    return sorted_columns
+    
 
 def plot_platemap(
     df,
