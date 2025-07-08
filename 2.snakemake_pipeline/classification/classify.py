@@ -273,7 +273,7 @@ def experimental_runner(
         if dframe_grouped[threshold_key].unique().size < 2:
             continue
         df_group_one = dframe_grouped[
-            dframe_grouped[threshold_key] == "disease_wt"
+            dframe_grouped[threshold_key] != "allele" #== "disease_wt", sometimes the reference is misannotated (e.g. KRAS)
         ].reset_index(drop=True)
         df_group_one["Label"] = 1
 
@@ -670,7 +670,7 @@ def experimental_runner_plate_rep(
             continue
 
         df_group_one = dframe_grouped[
-            dframe_grouped["Metadata_node_type"] == "disease_wt"
+            dframe_grouped["Metadata_node_type"] != "allele" #== "disease_wt", sometimes the reference is misannotated (e.g. KRAS)
         ].reset_index(drop=True)
         df_group_one["Label"] = 1
         ref_al_wells = df_group_one["Metadata_well_position"].unique()
