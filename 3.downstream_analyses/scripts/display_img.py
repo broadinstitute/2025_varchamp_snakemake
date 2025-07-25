@@ -80,7 +80,16 @@ def plot_allele(pm, variant, sel_channel, plate_img_qc, auroc_df=None, site="05"
             # break
 
             if plate_img_qc is not None:
-                is_bg = plate_img_qc.filter((pl.col("plate") == plate_img_dir.split("__")[0]) & (pl.col("well") == well) & (pl.col("channel") == sel_channel))["is_bg"].to_numpy()[0]
+                is_bg_array = plate_img_qc.filter(
+                    (pl.col("plate") == plate_img_dir.split("__")[0])
+                    & (pl.col("well") == well)
+                    & (pl.col("channel") == sel_channel)
+                )["is_bg"].to_numpy()
+                if is_bg_array.size > 0:
+                    is_bg = is_bg_array[0]
+                else:
+                    is_bg = True
+                    
             if (os.path.exists(f"{batch_img_dir}/{plate_img_dir}/Images/{img_file}")):
                 img = imread(f"{batch_img_dir}/{plate_img_dir}/Images/{img_file}", as_gray=True)
             else:
@@ -191,10 +200,16 @@ def plot_allele_single_plate(pm, variant, sel_channel, plate_img_qc, auroc_df=No
         # break
 
         if plate_img_qc is not None:
-            is_bg = plate_img_qc.filter(
+            is_bg_array = plate_img_qc.filter(
                 (pl.col("plate") == plate_img_dir.split("__")[0])
                 & (pl.col("well") == well)
-                & (pl.col("channel") == sel_channel))["is_bg"].to_numpy()[0]
+                & (pl.col("channel") == sel_channel)
+            )["is_bg"].to_numpy()
+            if is_bg_array.size > 0:
+                is_bg = is_bg_array[0]
+            else:
+                is_bg = True
+                
         if (os.path.exists(f"{batch_img_dir}/{plate_img_dir}/Images/{img_file}")):
             img = imread(f"{batch_img_dir}/{plate_img_dir}/Images/{img_file}", as_gray=True)
         else:
