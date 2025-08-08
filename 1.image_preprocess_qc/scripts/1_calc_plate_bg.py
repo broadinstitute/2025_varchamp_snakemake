@@ -33,6 +33,8 @@ def __():
     from skimage.io import imread
     from concurrent.futures import ThreadPoolExecutor, as_completed
     from tqdm import tqdm
+    import sys
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
     from img_utils import letter_dict, channel_dict
 
     # move into the script’s directory if needed

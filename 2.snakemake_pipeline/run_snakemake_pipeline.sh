@@ -1,5 +1,21 @@
 #!/bin/bash
 
+cp inputs/snakemake_files/Snakefile_batch17 .
+nohup snakemake \
+    --snakefile Snakefile_batch17 \
+    --cores all &> outputs/snakemake_logs/snakemake_batch17.log
+
+cp inputs/snakemake_files/Snakefile_batch17_mc .
+nohup snakemake \
+    --snakefile Snakefile_batch17_mc \
+    --cores all &> outputs/snakemake_logs/snakemake_batch17_mc.log
+
+# Run batch 11
+# cp inputs/snakemake_files/Snakefile_batch11 .
+# snakemake \
+#     --snakefile Snakefile_batch11 \
+#     --cores 128 &> outputs/snakemake_logs/snakemake_batch11.log
+
 ## Run batch 11
 # cp inputs/snakemake_files/Snakefile_batch11 .
 # snakemake \

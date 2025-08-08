@@ -7,10 +7,10 @@ from functools import reduce
 import polars as pl
 
 ## allele collection direcotory
-ALLELE_COLLECT_DIR = "../../../../../../../1_allele_collection"
+# ALLELE_COLLECT_DIR = "../../../../../../../1_allele_collection"
 
 ## snakemake pipeline directory
-SNAKEMAKE_PIPELINE_DIR = "/home/shenrunx/igvf/varchamp/2025_laval_submitted/2_individual_assay_results/imaging/2_analysis/1_snakemake_pipeline/2025_varchamp_snakemake"
+SNAKEMAKE_PIPELINE_DIR = "/home/shenrunx/igvf/varchamp/2025_varchamp_snakemake"
 
 ## .tiff img directory, downloaded from aws cell-painting gallery
 TIFF_IMGS_DIR = f"{SNAKEMAKE_PIPELINE_DIR}/1.image_preprocess_qc/inputs/cpg_imgs"

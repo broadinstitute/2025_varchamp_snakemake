@@ -21,7 +21,7 @@ sys.path.append("..")
 from utils import find_feat_cols, find_meta_cols, remove_nan_infs_columns
 
 ## constants
-FEAT_TYPE_SET = set(["GFP", "DNA", "AGP", "Mito", "Morph"])
+FEAT_TYPE_SET = set(["GFP", "DNA", "AGP", "Mito", "TxControl", "Morph"])
 
 """
     Util functions for annotations
@@ -129,7 +129,7 @@ def get_classifier_features(dframe: pd.DataFrame, feat_type: str):
         feat_col = [
             i
             for i in feat_col
-            if ("GFP" not in i) and ("Brightfield" not in i)
+            if ("GFP" not in i) and ("Brightfield" not in i) and ("TxControl" not in i)
         ]
 
     dframe = pd.concat([dframe[meta_col], dframe[feat_col]], axis=1)
@@ -259,6 +259,9 @@ def experimental_runner(
     feat_cols = find_feat_cols(exp_dframe)
     feat_cols = [i for i in feat_cols if i != "Label"]
 
+    if len(feat_cols) == 0:
+        return pd.DataFrame(), pd.DataFrame()
+
     group_list = []
     pair_list = []
     feat_list = []
@@ -365,6 +368,9 @@ def control_group_runner(
     ctrl_dframe = get_classifier_features(ctrl_dframe, feat_type)
     feat_cols = find_feat_cols(ctrl_dframe)
     feat_cols = [i for i in feat_cols if i != "Label"]
+
+    if len(feat_cols) == 0:
+        return pd.DataFrame(), pd.DataFrame()
 
     group_list = []
     pair_list = []
@@ -526,6 +532,9 @@ def control_group_runner_fewer_rep(
     feat_cols = find_feat_cols(ctrl_dframe)
     feat_cols = [i for i in feat_cols if i != "Label"]
 
+    if len(feat_cols) == 0:
+        return pd.DataFrame(), pd.DataFrame()
+
     group_list = []
     pair_list = []
     feat_list = []
@@ -654,6 +663,9 @@ def experimental_runner_plate_rep(
     exp_dframe = get_classifier_features(exp_dframe, feat_type)
     feat_cols = find_feat_cols(exp_dframe)
     feat_cols = [i for i in feat_cols if i != "Label"]
+
+    if len(feat_cols) == 0:
+        return pd.DataFrame(), pd.DataFrame()
 
     group_list = []
     pair_list = []
@@ -861,8 +873,9 @@ def run_classify_workflow(
                 df_feat_pro_exp, df_result_pro_exp = experimental_runner(
                     df_exp, pq_writer=writer, log_file=log_file, feat_type=feat
                 )
-                feat_import_dfs += [df_feat_pro_con, df_feat_pro_exp]
-                class_res_dfs += [df_result_pro_con, df_result_pro_exp]
+                if (df_feat_pro_con.shape[0] > 0):
+                    feat_import_dfs += [df_feat_pro_con, df_feat_pro_exp]
+                    class_res_dfs += [df_result_pro_con, df_result_pro_exp]
         else:
             ## If the plate_layout is multi_rep, with multiple wells per allele on a single plate
             ## we can get control_df with every possible allele on the same plate
@@ -882,8 +895,10 @@ def run_classify_workflow(
                 df_feat_pro_exp, df_result_pro_exp = experimental_runner_plate_rep(
                     df_exp, pq_writer=writer, err_logger=log_file, feat_type=feat
                 )
-                feat_import_dfs += [df_feat_pro_con, df_feat_pro_exp]
-                class_res_dfs += [df_result_pro_con, df_result_pro_exp]
+
+                if (df_feat_pro_con.shape[0] > 0):
+                    feat_import_dfs += [df_feat_pro_con, df_feat_pro_exp]
+                    class_res_dfs += [df_result_pro_con, df_result_pro_exp]
 
         ## Close the parquest writer
         writer.close()

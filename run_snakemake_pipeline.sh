@@ -2,6 +2,11 @@
 
 ## Run image QC
 # python 1.image_preprocess_qc/scripts/1_calc_plate_bg.py --batch_list "2024_01_23_Batch_7,2024_02_06_Batch_8,2024_12_09_Batch_11,2024_12_09_Batch_12,2025_03_17_Batch_15,2025_03_17_Batch_16" --input_dir "1.image_preprocess_qc/inputs/cpg_imgs" --output_dir "1.image_well_qc_results/outputs/plate_bg_summary" --workers 256
+# python 1.image_preprocess_qc/scripts/1_calc_plate_bg.py --batch_list "2025_05_23_Batch_17" --input_dir "1.image_preprocess_qc/inputs/cpg_imgs" --output_dir "1.image_preprocess_qc/outputs/plate_bg_summary" --workers 64
+
+## Run snakemake pipeline
+# cp snakemake_files/Snakefile_batch15 /home/shenrunx/igvf/varchamp/2025_laval_submitted/2_individual_assay_results/imaging/2_analysis/1_snakemake_pipeline/2025_varchamp_snakemake/2.snakemake_pipeline
+# cp snakemake_files/Snakefile_batch16 /home/shenrunx/igvf/varchamp/2025_laval_submitted/2_individual_assay_results/imaging/2_analysis/1_snakemake_pipeline/2025_varchamp_snakemake/2.snakemake_pipeline
 
 # cp snakemake_files/Snakefile_batch7 /home/shenrunx/igvf/varchamp/2025_laval_submitted/2_individual_assay_results/imaging/2_analysis/1_snakemake_pipeline/2025_varchamp_snakemake/2.snakemake_pipeline
 # cp snakemake_files/Snakefile_batch8 /home/shenrunx/igvf/varchamp/2025_laval_submitted/2_individual_assay_results/imaging/2_analysis/1_snakemake_pipeline/2025_varchamp_snakemake/2.snakemake_pipeline
