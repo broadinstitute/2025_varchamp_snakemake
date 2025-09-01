@@ -118,18 +118,25 @@ def get_classifier_features(dframe: pd.DataFrame, feat_type: str):
     feat_col = find_feat_cols(dframe)
     meta_col = find_meta_cols(dframe)
 
-    if feat_type != "Morph":
+    if feat_type == "GFP":
         feat_col = [
             i
             for i in feat_col
             if (feat_type.lower() in i.lower())
             and ("Brightfield" not in i) ## excluding Brightfield features
         ]
-    else:
+    elif feat_type == "Morph":
         feat_col = [
             i
             for i in feat_col
             if ("GFP" not in i) and ("Brightfield" not in i) and ("TxControl" not in i)
+        ]
+    else:
+        feat_col = [
+            i
+            for i in feat_col
+            if (feat_type.lower() in i.lower())
+            and ("Brightfield" not in i) and ("GFP" not in i) ## excluding Brightfield features and GFP features for other channel
         ]
 
     dframe = pd.concat([dframe[meta_col], dframe[feat_col]], axis=1)
