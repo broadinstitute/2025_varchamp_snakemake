@@ -18,6 +18,8 @@ import xgboost as xgb
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import roc_auc_score
 from tqdm import tqdm
+import seaborn as sns
+import matplotlib.pyplot as plt
 from classify import *
 from analysis import *
 from scipy.stats import ttest_rel, ttest_ind, shapiro, wilcoxon
@@ -64,63 +66,69 @@ def paired_ttest(dat, reference: str, var: str, value: str, min_num_rep: int=3):
 
 # GFP range optimization function with expanded ranges and ratio constraint
 def find_optimal_gfp_range_fast(ref_gfp: np.ndarray, var_gfp: np.ndarray, 
-                               min_cells_per_well: int = 20):
-    """Ultra-fast vectorized GFP range optimization with expanded ranges and ratio constraint"""
+                                quantile_pair: tuple=(0.25, 0.75),
+                                min_cells_per_well: int = 20):
+    """Ultra-fast vectorized GFP range optimization with single quantile pair"""
     # Expanded quantile range testing: from 10%-90% down to 30%-70%
-    quantile_pairs = [
-        (0.2, 0.8), (0.22, 0.78), (0.25, 0.75), (0.27, 0.73), (0.3, 0.7)
-    ] ## (0.1, 0.9), (0.12, 0.88), (0.15, 0.85), (0.17, 0.83), 
-    
-    # Vectorized quantile calculation for all ranges
-    all_quantiles = [q for pair in quantile_pairs for q in pair]
-    ref_qs = np.quantile(ref_gfp, all_quantiles)
-    var_qs = np.quantile(var_gfp, all_quantiles)
+    # quantile_pairs = [
+    #     (0.2, 0.8), (0.22, 0.78), (0.25, 0.75), (0.27, 0.73), (0.3, 0.7)
+    # ] ## (0.1, 0.9), (0.12, 0.88), (0.15, 0.85), (0.17, 0.83), 
     
     best_range = None
     max_total_cells = 0
     best_quantile_info = ""
-    
     results = []
+    
+    # Vectorized quantile calculation for all ranges
+    # all_quantiles = [q for pair in quantile_pairs for q in pair]
+    # ref_qs = np.quantile(ref_gfp, all_quantiles)
+    # var_qs = np.quantile(var_gfp, all_quantiles)
     # Test each quantile pair
-    for i, (low_q, high_q) in enumerate(quantile_pairs):
-        # Get quantile boundaries for this pair
-        ref_low = ref_qs[i*2]
-        ref_high = ref_qs[i*2 + 1] 
-        var_low = var_qs[i*2]
-        var_high = var_qs[i*2 + 1]
-        
-        # Find overlapping range
-        range_min = max(ref_low, var_low)
-        range_max = min(ref_high, var_high)
-        
-        # Skip if invalid range
-        if range_min >= range_max:
-            results.append((f"{int(low_q*100)}-{int(high_q*100)}%", 0, 0, 0, "Invalid range", "N/A"))
-            continue
-            
-        # Vectorized cell counting
-        ref_mask = (ref_gfp >= range_min) & (ref_gfp <= range_max)
-        var_mask = (var_gfp >= range_min) & (var_gfp <= range_max)
-        ref_count = np.sum(ref_mask)
-        var_count = np.sum(var_mask)
-        
-        # Calculate sample size ratio
-        if ref_count == 0 or var_count == 0:
-            ratio_status = "Zero samples"
-        else:
-            ratio_status = f"{max(ref_count, var_count) / min(ref_count, var_count)}:.2f"
-        
-        results.append((f"{int(low_q*100)}-{int(high_q*100)}%", ref_count, var_count, 
-                       ref_count + var_count, f"GFP: {range_min:.1f}-{range_max:.1f}", ratio_status))
-        
-        # Check minimum requirements and ratio constraint
-        if (ref_count >= min_cells_per_well and var_count >= min_cells_per_well and
-            ref_count > 0 and var_count > 0):
-            total_cells = ref_count + var_count
-            if total_cells > max_total_cells:
-                max_total_cells = total_cells
-                best_range = (range_min, range_max, ref_count, var_count)
-                best_quantile_info = f"{int(low_q*100)}%-{int(high_q*100)}%"
+    # for i, (low_q, high_q) in enumerate(quantile_pairs):
+    # ref_low = ref_qs[i*2]
+    # ref_high = ref_qs[i*2 + 1] 
+    # var_low = var_qs[i*2]
+    # var_high = var_qs[i*2 + 1]
+
+    low_q, high_q = quantile_pair
+    # Calculate quantiles directly for the single pair
+    ref_low = np.quantile(ref_gfp, low_q)
+    ref_high = np.quantile(ref_gfp, high_q)
+    var_low = np.quantile(var_gfp, low_q)
+    var_high = np.quantile(var_gfp, high_q)
+    
+    # Find overlapping range
+    range_min = max(ref_low, var_low)
+    range_max = min(ref_high, var_high)
+    
+    # Skip if invalid range
+    if range_min >= range_max:
+        results.append((f"{int(low_q*100)}-{int(high_q*100)}%", 0, 0, 0, "Invalid range", "N/A"))
+        return None, None, 0, 0, "NO_SUITABLE_RANGE"
+    
+    # Vectorized cell counting
+    ref_mask = (ref_gfp >= range_min) & (ref_gfp <= range_max)
+    var_mask = (var_gfp >= range_min) & (var_gfp <= range_max)
+    ref_count = np.sum(ref_mask)
+    var_count = np.sum(var_mask)
+    
+    # Calculate sample size ratio
+    if ref_count == 0 or var_count == 0:
+        ratio_status = "Zero samples"
+    else:
+        ratio_status = f"{max(ref_count, var_count) / min(ref_count, var_count)}:.2f"
+    
+    results.append((f"{int(low_q*100)}-{int(high_q*100)}%", ref_count, var_count, 
+                    ref_count + var_count, f"GFP: {range_min:.1f}-{range_max:.1f}", ratio_status))
+    
+    # Check minimum requirements and ratio constraint
+    if (ref_count >= min_cells_per_well and var_count >= min_cells_per_well and
+        ref_count > 0 and var_count > 0):
+        total_cells = ref_count + var_count
+        if total_cells > max_total_cells:
+            max_total_cells = total_cells
+            best_range = (range_min, range_max, ref_count, var_count)
+            best_quantile_info = f"{int(low_q*100)}%-{int(high_q*100)}%"
     
     # Show all results
     # print("GFP Range Optimization Results (with ratio constraint ≤3x):")
@@ -132,11 +140,11 @@ def find_optimal_gfp_range_fast(ref_gfp: np.ndarray, var_gfp: np.ndarray,
     #     meets_ratio = "Ratio:" in ratio_info and not "(>3x)" in ratio_info if ref_c > 0 and var_c > 0 else False
     #     status = "✅" if (meets_min and meets_ratio) else "❌"
     #     print(f"{status} {quantile:>12} | {ref_c:>8} | {var_c:>8} | {total:>5} | {gfp_range:>14} | {ratio_info}")
-    
-    if best_range is None:
+
+    if best_range is not None:
+        return best_range[0], best_range[1], best_range[2], best_range[3], best_quantile_info
+    else:
         return None, None, 0, 0, "NO_SUITABLE_RANGE"
-    
-    return best_range[0], best_range[1], best_range[2], best_range[3], best_quantile_info
 
 
 """
@@ -219,9 +227,10 @@ def experimental_runner_filter_gfp(
                     df_sampled_well_agg.to_pandas(), 
                     key, subkey, GFP_INTENSITY_COLUMN
                 )))
-
+                
+                ## get the optimal gfp range for paired ref-var wells on each plate
                 df_sampled_filtered = pd.DataFrame()
-                gfp_filtered_results = []
+                # gfp_filtered_results = []
                 for plate in plate_list:
                     df_plate = df_sampled[df_sampled["Metadata_Plate"] == plate]
                     ref_gfp = df_plate[
@@ -232,19 +241,16 @@ def experimental_runner_filter_gfp(
                     ][GFP_INTENSITY_COLUMN].to_numpy()
                     
                     gfp_low, gfp_high, ref_count, var_count, quantile_info = find_optimal_gfp_range_fast(
-                        ref_gfp, var_gfp, min_cells_per_well
+                        ref_gfp, var_gfp, quantile_pair=(0.25, 0.75), min_cells_per_well=min_cells_per_well
                     )
-                    
                     if gfp_low is not None:
                         # Filter cells within the optimal GFP range
                         df_plate_filtered = df_plate[
                             (df_plate[GFP_INTENSITY_COLUMN] >= gfp_low) & 
                             (df_plate[GFP_INTENSITY_COLUMN] <= gfp_high)
                         ].reset_index(drop=True)
-
                         df_plate_filtered_ref = df_plate_filtered[df_plate_filtered["Label"] == 1]
                         df_plate_filtered_var = df_plate_filtered[df_plate_filtered["Label"] == 0]
-
                         ## subsample the larger group to maintain a ratio <= 3
                         if max(df_plate_filtered_var.shape[0], df_plate_filtered_ref.shape[0]) / min(df_plate_filtered_var.shape[0], df_plate_filtered_ref.shape[0]) > 3:
                             if df_plate_filtered_var.shape[0] > df_plate_filtered_ref.shape[0]:
@@ -257,43 +263,48 @@ def experimental_runner_filter_gfp(
                                     n = df_plate_filtered_var.shape[0] * 3 - 1,
                                     random_state=42
                                 )
-
                         ## merge back the filtered ref and var dataframes
                         df_plate_filtered = pd.concat([
                             df_plate_filtered_ref, df_plate_filtered_var
                         ], ignore_index=True)
-                        
+                        # fig, axes = plt.subplots(1,2,figsize=(10,4))
+                        # sns.boxenplot(
+                        #     x="Metadata_gene_allele",
+                        #     y=GFP_INTENSITY_COLUMN,
+                        #     data=df_plate,
+                        #     ax=axes[0]
+                        # )
+                        # axes[0].set_title(f"{plate} Original GFP Distribution\n{ref_var[0]} vs {ref_var[1]}\nN={df_plate.shape[0]}")
+                        # sns.boxenplot(
+                        #     x="Metadata_gene_allele",
+                        #     y=GFP_INTENSITY_COLUMN,
+                        #     data=df_plate_filtered,
+                        #     ax=axes[1]
+                        # )
+                        # axes[1].set_title(f"{plate} Filtered GFP Distribution\n{ref_var[0]} vs {ref_var[1]}\nN={df_plate_filtered.shape[0]}\nGFP: {gfp_low:.1f}-{gfp_high:.1f} ({quantile_info})")
+                        # plt.savefig(f"{subkey}_{plate}_{ref_var[0]}_vs_{ref_var[1]}_gfp_filtered.png", dpi=150)
+
                         # Update df_sampled with filtered plate data
                         df_sampled_filtered = pd.concat([
                             df_sampled_filtered,
                             df_plate_filtered
                         ], ignore_index=True)
-                        
-                        gfp_filtered_results.append({
-                            'pair_id': f"{plate}_{ref_var[0]}_vs_{ref_var[1]}",
-                            'plate': plate,
-                            'ref_well': ref_var[0],
-                            'var_well': ref_var[1],
-                            'gfp_min': gfp_low,
-                            'gfp_max': gfp_high,
-                            'quantile_range': quantile_info,
-                            'status': 'SUCCESS'
-                        })
+                        log_file.write(f"{key}, {subkey}, {ref_var}, {plate}, GFP range: {gfp_low:.2f}-{gfp_high:.2f}, Ref # cells: {ref_count}, Var # cells: {var_count}, Quantile: {quantile_info}, Status: SUCCESS\n")
                     else:
-                        gfp_filtered_results.append({
-                            'pair_id': f"{plate}_{ref_var[0]}_vs_{ref_var[1]}",
-                            'plate': plate,
-                            'ref_well': ref_var[0],
-                            'var_well': ref_var[1],
-                            'gfp_min': None,
-                            'gfp_max': None,
-                            'quantile_range': 'FAILED',
-                            'status': 'NO_SUITABLE_RANGE'
-                        })
-
+                        # gfp_filtered_results.append({
+                        #     'pair_id': f"{plate}_{ref_var[0]}_vs_{ref_var[1]}",
+                        #     'plate': plate,
+                        #     'ref_well': ref_var[0],
+                        #     'var_well': ref_var[1],
+                        #     'gfp_min': None,
+                        #     'gfp_max': None,
+                        #     'quantile_range': 'FAILED',
+                        #     'status': 'NO_SUITABLE_RANGE'
+                        # })
+                        log_file.write(f"{key}, {subkey}, {ref_var}, {plate}, GFP range: None-None, Ref # cells: None, Var # cells: None, Quantile: FAILED, Status: NO_SUITABLE_RANGE\n")
 
                 if df_sampled_filtered.shape[0] == 0:
-                    log_file.write(f"{key}, {subkey}, {ref_var}, Failed to correct for GFP")
+                    log_file.write(f"{key}, {subkey}, {ref_var}, Failed to correct for GFP on ANY PLATE and WELL pair. Skipping...\n")
                     continue
 
                 log_file.write(f"{key}, {subkey}, {ref_var}, Corrected GFP paired t-test:")
@@ -311,8 +322,27 @@ def experimental_runner_filter_gfp(
                     key, subkey, GFP_INTENSITY_COLUMN
                 )))
 
-                ## stored the filtered cell list
+                ## store the ref-vs-var tags for this filtered df
+                df_sampled_filtered["Metadata_refvar_classify"] = f"{key}_{subkey}_{ref_var[0]}-{ref_var[1]}"
+                ## stored the filtered cell list per this well pair across plates
                 filtered_cell_list.append(df_sampled_filtered)
+
+                # fig, axes = plt.subplots(1,2,figsize=(10,4))
+                # sns.boxenplot(
+                #     x="Metadata_gene_allele",
+                #     y=GFP_INTENSITY_COLUMN,
+                #     data=df_sampled_,
+                #     ax=axes[0]
+                # )
+                # axes[0].set_title(f"{plate} Original GFP\n{ref_var[0]} vs {ref_var[1]}\nN={df_plate.shape[0]}")
+                # sns.boxenplot(
+                #     x="Metadata_gene_allele",
+                #     y=GFP_INTENSITY_COLUMN,
+                #     data=df_sampled_filtered,
+                #     ax=axes[1]
+                # )
+                # axes[1].set_title(f"{plate} Filtered GFP\n{ref_var[0]} vs {ref_var[1]}\nN={df_plate_filtered.shape[0]}\nGFP: {gfp_low:.1f}-{gfp_high:.1f} ({quantile_info})")
+                # plt.savefig(f"/home/shenrunx/igvf/varchamp/2025_Fang_CCM2_Imaging/data/interim/large_files/{subkey}_{ref_var[0]}_vs_{ref_var[1]}_gfp_filtered.png", dpi=150)
 
                 ## during the inference, drop the gfp column
                 df_sampled_filtered = df_sampled_filtered.drop(GFP_INTENSITY_COLUMN, axis=1)

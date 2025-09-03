@@ -99,7 +99,7 @@ def stratify_by_plate(df_sampled: pd.DataFrame, plate: str):
     # print(df_sampled.head())
     df_sampled_platemap = plate.split("_T")[0]
     platemaps = df_sampled[df_sampled["Metadata_Plate"].str.contains(df_sampled_platemap)]["Metadata_plate_map_name"].to_list()
-    assert(len(set(platemaps))==1), "Only one platemap should be associated with plate: {plate}."
+    assert(len(set(platemaps))==1), f"Only one platemap should be associated with plate: {plate}."
     platemap = platemaps[0]
 
     # Train on data from same platemap but other plates
