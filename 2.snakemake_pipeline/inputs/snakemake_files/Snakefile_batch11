@@ -12,4 +12,5 @@ outputs = config["output_dir"]
 
 rule all:
     input:
-        f"{outputs}/classification_analyses/{BATCH}/{PIPELINE}/metrics.csv"
+        f"{outputs}/classification_analyses/{BATCH}/{PIPELINE}/metrics.csv",
+        f"{outputs}/classification_analyses/{BATCH}/{PIPELINE}/metrics_gfp_adj.csv"
