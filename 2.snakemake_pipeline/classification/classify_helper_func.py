@@ -9,7 +9,7 @@ sys.path.append("..")
 from utils import find_feat_cols, find_meta_cols
 
 # Constants
-FEAT_TYPE_SET = ["GFP"] ##, "DNA", "AGP", "Mito", "Morph", temporarily disable other channels
+FEAT_TYPE_SET = ["GFP", "DNA", "AGP", "Mito", "Morph"] ##, "DNA", "AGP", "Mito", "Morph", temporarily disable other channels
 
 # GPU Management
 def get_available_gpu():
