@@ -22,7 +22,19 @@ rule classify:
         cc_thresh = config["cc_threshold"],
         plate_layout = config["plate_layout"],
     run:
-        classification.run_classify_workflow(*input, *output, cc_threshold=params.cc_thresh, plate_layout=params.plate_layout)
+        try:
+            classification.run_classify_workflow(*input, *output, cc_threshold=params.cc_thresh, plate_layout=params.plate_layout)
+        finally:
+            # Force system-wide cleanup
+            import gc
+            import subprocess
+            gc.collect()
+            try:
+                # Try to drop caches (requires sudo or specific permissions)
+                subprocess.run(["sync"], check=False)
+                # Note: This requires sudo: echo 3 > /proc/sys/vm/drop_caches
+            except:
+                pass
 
 
 rule calculate_metrics:

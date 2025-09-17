@@ -32,6 +32,8 @@ input/output paths and configuration parameters.
 import os
 import sys
 import warnings
+import gc
+import psutil
 from typing import Union
 import numpy as np
 import pandas as pd
@@ -68,6 +70,66 @@ from .classify_gfp_filter_func import (
 )
 
 #######################################
+# MEMORY MANAGEMENT FUNCTIONS
+#######################################
+
+def log_memory_usage(log_file, stage=""):
+    """Log current memory usage including swap"""
+    try:
+        process = psutil.Process()
+        memory_info = process.memory_info()
+        system_memory = psutil.virtual_memory()
+        swap_memory = psutil.swap_memory()
+        
+        log_file.write(f"[{stage}] Memory Usage:\n")
+        log_file.write(f"  RSS: {memory_info.rss / 1024**3:.2f} GB\n")
+        log_file.write(f"  VMS: {memory_info.vms / 1024**3:.2f} GB\n")
+        log_file.write(f"  System RAM: {system_memory.used / 1024**3:.2f} / {system_memory.total / 1024**3:.2f} GB ({system_memory.percent}%)\n")
+        log_file.write(f"  Swap: {swap_memory.used / 1024**3:.2f} / {swap_memory.total / 1024**3:.2f} GB ({swap_memory.percent}%)\n")
+        log_file.flush()
+    except Exception as e:
+        log_file.write(f"Failed to log memory usage: {e}\n")
+
+
+def force_memory_cleanup(log_file):
+    """Force garbage collection and attempt to free memory"""
+    log_file.write("Forcing memory cleanup...\n")
+    
+    # Force garbage collection multiple times
+    for i in range(3):
+        collected = gc.collect()
+        log_file.write(f"  GC round {i+1}: collected {collected} objects\n")
+    
+    # Try to release unused memory back to OS (Linux only)
+    try:
+        import ctypes
+        libc = ctypes.CDLL("libc.so.6")
+        libc.malloc_trim(0)
+        log_file.write("  malloc_trim() called\n")
+    except Exception as e:
+        log_file.write(f"  malloc_trim() failed: {e}\n")
+    
+    log_file.flush()
+
+
+def check_memory_limits(log_file, max_memory_gb=32):
+    """Check if memory usage is approaching limits"""
+    try:
+        system_memory = psutil.virtual_memory()
+        swap_memory = psutil.swap_memory()
+        
+        total_used_gb = (system_memory.used + swap_memory.used) / 1024**3
+        
+        if total_used_gb > max_memory_gb:
+            log_file.write(f"WARNING: Memory usage ({total_used_gb:.2f} GB) exceeds limit ({max_memory_gb} GB)\n")
+            return False
+        return True
+    except Exception as e:
+        log_file.write(f"Failed to check memory limits: {e}\n")
+        return True
+    
+
+#######################################
 # MAIN WORKFLOW FUNCTION
 #######################################
 
@@ -83,7 +145,7 @@ def run_classify_workflow(
     filtered_cell_path: str,
     cc_threshold: int,
     plate_layout: str,
-    use_gpu: Union[str, None] = "0,1",
+    use_gpu: Union[str, None] = None ## "0,1"
 ):
     """
     Run workflow for single-cell classification
@@ -237,16 +299,23 @@ def run_classify_workflow(
                         feat_import_gfp_adj_dfs += [df_feat_pro_exp_gfp_adj]
                         class_res_gfp_adj_dfs += [df_result_pro_exp_gfp_adj]
                         filtered_cells_gfp_adj_dfs += [df_filtered_cells_gfp_adj]
-                        
+
+                    ## drop the gfp column during the inference if it was not selected during feature selection
+                    if GFP_INTENSITY_COLUMN not in dframe_featsel.columns:
+                        df_exp = df_exp.drop(GFP_INTENSITY_COLUMN, axis=1)
+                        df_control = df_control.drop(GFP_INTENSITY_COLUMN, axis=1)
+                
                 df_feat_pro_con, df_result_pro_con = control_group_runner(
-                    df_control, pq_writer=writer, log_file=log_file, feat_type=feat
+                    df_control, 
+                    pq_writer=writer, 
+                    log_file=log_file, 
+                    feat_type=feat
                 )
-                ## drop the gfp column during the inference if it was not selected during feature selection
-                if GFP_INTENSITY_COLUMN not in dframe_featsel.columns:
-                    df_exp = df_exp.drop(GFP_INTENSITY_COLUMN, axis=1)
                 df_feat_pro_exp, df_result_pro_exp = experimental_runner(
                     df_exp, 
-                    pq_writer=writer, log_file=log_file, feat_type=feat
+                    pq_writer=writer, 
+                    log_file=log_file, 
+                    feat_type=feat
                 )
                 if (df_feat_pro_con.shape[0] > 0):
                     feat_import_dfs += [df_feat_pro_con, df_feat_pro_exp]
@@ -278,13 +347,14 @@ def run_classify_workflow(
                         class_res_gfp_adj_dfs += [df_result_pro_exp_gfp_adj]
                         filtered_cells_gfp_adj_dfs += [df_filtered_cells_gfp_adj]
 
+                    ## drop the gfp column during the inference
+                    if GFP_INTENSITY_COLUMN not in dframe_featsel.columns:
+                        df_exp = df_exp.drop(GFP_INTENSITY_COLUMN, axis=1)
+                        df_control = df_control.drop(GFP_INTENSITY_COLUMN, axis=1)
+
                 df_feat_pro_con, df_result_pro_con = control_group_runner_fewer_rep(
                     df_control, pq_writer=writer, err_logger=log_file, feat_type=feat
                 )
-                ## drop the gfp column during the inference
-                if GFP_INTENSITY_COLUMN not in dframe_featsel.columns:
-                    df_exp = df_exp.drop(GFP_INTENSITY_COLUMN, axis=1)
-                
                 df_feat_pro_exp, df_result_pro_exp = experimental_runner_plate_rep(
                     df_exp, 
                     pq_writer=writer, 
@@ -299,15 +369,6 @@ def run_classify_workflow(
         writer.close()
         writer_gfp.close()
 
-    # Concatenate results for both standard and GFP-adjusted analyses
-    df_feat = pd.concat(feat_import_dfs, ignore_index=True)
-    df_result = pd.concat(class_res_dfs, ignore_index=True)
-    df_result = df_result.drop_duplicates()
-
-    # Write out standard feature importance and classifier info
-    df_feat.to_csv(feat_output_path, index=False)
-    df_result.to_csv(info_output_path, index=False)
-
     # Handle GFP-adjusted results if available
     if feat_import_gfp_adj_dfs:
         df_feat_gfp_adj = pd.concat(feat_import_gfp_adj_dfs, ignore_index=True)
@@ -319,9 +380,40 @@ def run_classify_workflow(
         df_feat_gfp_adj.to_csv(feat_output_path_gfp, index=False)
         df_result_gfp_adj.to_csv(info_output_path_gfp, index=False)
         df_filtered_cell.to_parquet(filtered_cell_path, index=False)
-        
     # else:
     #     # Create empty files if no GFP-adjusted results
     #     pd.DataFrame().to_csv(feat_output_path_gfp, index=False)
     #     pd.DataFrame().to_csv(info_output_path_gfp, index=False)
     #     pd.DataFrame().to_parquet(filtered_cell_path, index=False)
+
+    # Concatenate results for both standard and GFP-adjusted analyses
+    df_feat = pd.concat(feat_import_dfs, ignore_index=True)
+    df_result = pd.concat(class_res_dfs, ignore_index=True)
+    df_result = df_result.drop_duplicates()
+
+    # Write out standard feature importance and classifier info
+    df_feat.to_csv(feat_output_path, index=False)
+    df_result.to_csv(info_output_path, index=False)
+
+    # CLEANUP POINT: Final cleanup before function exit
+    try:
+        # Clean up all remaining large dataframes
+        del dframe, df_exp
+        if 'df_control' in locals():
+            del df_control
+        if 'df_feat' in locals():
+            del df_feat
+        if 'df_result' in locals():
+            del df_result
+        if 'df_feat_gfp_adj' in locals():
+            del df_feat_gfp_adj, df_result_gfp_adj, df_filtered_cell
+
+        # Force final memory cleanup
+        force_memory_cleanup(None)  # Pass None since log file is closed
+
+        # Log final memory state to console
+        swap_memory = psutil.swap_memory()
+        print(f"Final swap usage: {swap_memory.used / 1024**3:.2f} GB ({swap_memory.percent}%)")
+
+    except Exception as e:
+        print(f"Error during final cleanup: {e}")

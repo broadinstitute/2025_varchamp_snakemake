@@ -1,10 +1,11 @@
 import re
+import pickle
 import numpy as np
+from functools import reduce
+import polars as pl
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import seaborn as sns
-from functools import reduce
-import polars as pl
 
 ## allele collection direcotory
 # ALLELE_COLLECT_DIR = "../../../../../../../1_allele_collection"
@@ -30,6 +31,11 @@ CLASS_ANALYSES_DIR = f"{SNAKEMAKE_PIPELINE_DIR}/2.snakemake_pipeline/outputs/cla
 CLASS_RESULTS_DIR = f"{SNAKEMAKE_PIPELINE_DIR}/2.snakemake_pipeline/outputs/classification_results"
 
 ## cell count and abundance change directory
+IMG_METADATA_FILE = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/outputs/0.img_metadata_qc/allele_meta_df.csv"
+IMG_METADATA_DICT_FILE = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/outputs/0.img_metadata_qc/allele_meta_df_dict.pckl"
+IMG_QC_SUM_DF_FILE = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/outputs/0.img_metadata_qc/img_well_qc_sum_df.csv"
+IMG_QC_SUM_DICT_FILE = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/outputs/0.img_metadata_qc/img_well_qc_sum_dict.pckl"
+
 CC_ABUND_DIR = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/outputs/1.cell_count_abundance_change"
 CLASS_SUMMARY_DIR = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/outputs/2.classification_results"
 
@@ -299,6 +305,17 @@ def channel_to_cmap(channel):
     else:
         cmap = "gray"
     return cmap
+
+
+def channel_to_rgb(channel):
+    """Convert channel name to RGB values for multi-channel visualization"""
+    channel_rgb_map = {
+        "GFP": [0.396, 0.996, 0.031],     # Green
+        "DAPI": [0.0, 0.0, 1.0],          # Blue  
+        "Mito": [1.0, 0.0, 0.0],          # Red
+        "AGP": [1.0, 1.0, 0.0],           # Yellow
+    }
+    return channel_rgb_map.get(channel, [1.0, 1.0, 1.0])  # Default to white
 
 
 # Convert letter rows to numbers

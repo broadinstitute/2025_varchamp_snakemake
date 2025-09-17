@@ -171,10 +171,10 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-
 ## ignore snakemake pipeline inputs & outputs
 **/inputs/single_cell_profiles/
 **/.snakemake/
+2.snakemake_pipeline/outputs/
 
 ## no logs
 snakemake_pipeline/runinfo/
