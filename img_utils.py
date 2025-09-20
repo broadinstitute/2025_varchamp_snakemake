@@ -21,22 +21,25 @@ PLATEMAP_DIR = f"{SNAKEMAKE_PIPELINE_DIR}/2.snakemake_pipeline/inputs/metadata/p
 
 ## IMG QC related directories
 IMGS_QC_BG_SUM_DIR = f"{SNAKEMAKE_PIPELINE_DIR}/1.image_preprocess_qc/outputs/plate_bg_summary"
-IMGS_QC_METRICS_DIR = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/inputs/plate_well_qc_metrics"
+IMGS_QC_METRICS_DIR = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/inputs/1.plate_well_qc_metrics"
 
-## batch profiles directory
-PROF_DIR = f"{SNAKEMAKE_PIPELINE_DIR}/2.snakemake_pipeline/outputs/batch_profiles"
-
-## classification results directory from snakemake pipeline
-CLASS_ANALYSES_DIR = f"{SNAKEMAKE_PIPELINE_DIR}/2.snakemake_pipeline/outputs/classification_analyses"
-CLASS_RESULTS_DIR = f"{SNAKEMAKE_PIPELINE_DIR}/2.snakemake_pipeline/outputs/classification_results"
-
-## cell count and abundance change directory
 IMG_METADATA_FILE = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/outputs/0.img_metadata_qc/allele_meta_df.csv"
 IMG_METADATA_DICT_FILE = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/outputs/0.img_metadata_qc/allele_meta_df_dict.pckl"
 IMG_QC_SUM_DF_FILE = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/outputs/0.img_metadata_qc/img_well_qc_sum_df.csv"
 IMG_QC_SUM_DICT_FILE = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/outputs/0.img_metadata_qc/img_well_qc_sum_dict.pckl"
 
+## batch profiles directory
+PROF_DIR = f"{SNAKEMAKE_PIPELINE_DIR}/2.snakemake_pipeline/outputs/batch_profiles"
+
+## cell count and abundance change directory
 CC_ABUND_DIR = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/outputs/1.cell_count_abundance_change"
+
+## classification results directory from snakemake pipeline
+CLASS_ANALYSES_DIR = f"{SNAKEMAKE_PIPELINE_DIR}/2.snakemake_pipeline/outputs/classification_analyses"
+CLASS_RESULTS_DIR = f"{SNAKEMAKE_PIPELINE_DIR}/2.snakemake_pipeline/outputs/classification_results"
+
+## classification results summary from snakemake pipeline's results
+CLASS_INTERIM_DIR = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/inputs/2.classification_results"
 CLASS_SUMMARY_DIR = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/outputs/2.classification_results"
 
 ## CellProfiler Feature Sets
