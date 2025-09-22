@@ -1,0 +1,38 @@
+Disease Module Analysis - Final Summary
+==================================================
+
+Total variants: 9153
+Variants with disease annotations: 6883
+Unique genes: 1691
+Disease modules identified: 13
+High confidence assignments (≥0.8): 1130
+
+Disease Module Distribution:
+  Other_Genetic_Disorders: 5044 variants (55.1%)
+  Unclassified: 2270 variants (24.8%)
+  Cancer_Syndromes: 401 variants (4.4%)
+  Cardiomyopathy: 260 variants (2.8%)
+  Muscle_Disorders: 221 variants (2.4%)
+  Neuropathy: 210 variants (2.3%)
+  Metabolic_Disorders: 201 variants (2.2%)
+  Retinal_Disorders: 194 variants (2.1%)
+  Coagulation_Disorders: 111 variants (1.2%)
+  Immunodeficiency: 99 variants (1.1%)
+
+Top Genes by Disease Module:
+  Other_Genetic_Disorders:
+    AGXT: 111 variants (avg conf: 0.50)
+    CBS: 81 variants (avg conf: 0.50)
+    SLC22A5: 61 variants (avg conf: 0.50)
+  Cancer_Syndromes:
+    BRCA1: 64 variants (avg conf: 0.80)
+    SMAD4: 56 variants (avg conf: 0.80)
+    MLH1: 37 variants (avg conf: 0.80)
+  Cardiomyopathy:
+    PKP2: 65 variants (avg conf: 0.90)
+    DES: 36 variants (avg conf: 0.90)
+    TNNI3: 25 variants (avg conf: 0.90)
+  Muscle_Disorders:
+    DES: 76 variants (avg conf: 0.70)
+    SGCA: 24 variants (avg conf: 0.70)
+    MTM1: 20 variants (avg conf: 0.70)

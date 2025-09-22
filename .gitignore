@@ -184,3 +184,6 @@ snakemake_pipeline/runinfo/
 **/__pycache__/
 snakemake_pipeline/*.py[cod]
 snakemake_pipeline/*$py.class
+
+## local claude
+.claude/
