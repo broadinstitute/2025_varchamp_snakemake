@@ -7,6 +7,7 @@ import polars as pl
 import matplotlib.pyplot as plt
 import seaborn as sns
 from skimage.io import imread
+from skimage.transform import resize
 from functools import reduce
 import sys
 sys.path.append("../..")
@@ -19,401 +20,23 @@ BATCH_PROFILES_GFP_FILTERED = "../../2.snakemake_pipeline/outputs/classification
 GFP_INTENSITY_COLUMN = "Cells_Intensity_IntegratedIntensity_GFP" ## Cells_Intensity_MeanIntensity_GFP is another option
 
 
-### STORE / READ IN THE BATCH PROFILES ###
-### STORING THE PROFILES ###
-# # Filter thresholds
-# min_area_ratio = 0.15
-# max_area_ratio = 0.3
-# min_center = 50
-# max_center = 1030
-# # num_mad = 5
-# # min_cells = 250
-
-# batch_profiles = {}
-# for bio_rep, bio_rep_batches in BIO_REP_BATCHES_DICT.items():
-#     for batch_id in BIO_REP_BATCHES_DICT[bio_rep]:
-#         imagecsv_dir = IMG_ANALYSIS_DIR.format(batch_id) #f"../../../8.1_upstream_analysis_runxi/2.raw_img_qc/inputs/images/{batch_id}/analysis"
-#         prof_path = BATCH_PROFILES.format(batch_id)
-#         # Get metadata
-#         profiles = pl.scan_parquet(prof_path).select(
-#             ["Metadata_well_position", "Metadata_plate_map_name", "Metadata_ImageNumber", "Metadata_ObjectNumber",
-#             "Metadata_symbol", "Metadata_gene_allele", "Metadata_node_type", "Metadata_Plate",
-#             "Nuclei_AreaShape_Area", "Cells_AreaShape_Area", "Nuclei_AreaShape_Center_X", "Nuclei_AreaShape_Center_Y",
-#             "Nuclei_AreaShape_BoundingBoxMaximum_X", "Nuclei_AreaShape_BoundingBoxMaximum_Y", 
-#             "Nuclei_AreaShape_BoundingBoxMinimum_X", "Nuclei_AreaShape_BoundingBoxMinimum_Y", 
-#             "Cells_AreaShape_BoundingBoxMaximum_X", "Cells_AreaShape_BoundingBoxMaximum_Y", "Cells_AreaShape_BoundingBoxMinimum_X",
-#             "Cells_AreaShape_BoundingBoxMinimum_Y",	"Cells_AreaShape_Center_X",	"Cells_AreaShape_Center_Y",
-#             "Cells_Intensity_MeanIntensity_GFP", "Cells_Intensity_MedianIntensity_GFP", "Cells_Intensity_IntegratedIntensity_GFP"],
-#         ).collect()
-#         # print(profiles["Metadata_Plate"])
-    
-#         # Filter based on cell to nucleus area
-#         profiles = profiles.with_columns(
-#                         (pl.col("Nuclei_AreaShape_Area")/pl.col("Cells_AreaShape_Area")).alias("Nucleus_Cell_Area"),
-#                         pl.concat_str([
-#                             "Metadata_Plate", "Metadata_well_position", "Metadata_ImageNumber", "Metadata_ObjectNumber",
-#                             ], separator="_").alias("Metadata_CellID"),
-#                 ).filter((pl.col("Nucleus_Cell_Area") > min_area_ratio) & (pl.col("Nucleus_Cell_Area") < max_area_ratio))
-    
-#         # Filter cells too close to image edge
-#         profiles = profiles.filter(
-#             ((pl.col("Nuclei_AreaShape_Center_X") > min_center) & (pl.col("Nuclei_AreaShape_Center_X") < max_center) &
-#             (pl.col("Nuclei_AreaShape_Center_Y") > min_center) & (pl.col("Nuclei_AreaShape_Center_Y") < max_center)),
-#         )
-    
-#         # Calculate mean, median and mad of gfp intensity for each allele
-#         ## mean
-#         means = profiles.group_by(["Metadata_Plate", "Metadata_well_position"]).agg(
-#             pl.col("Cells_Intensity_MeanIntensity_GFP").mean().alias("WellIntensityMean"),
-#         )
-#         profiles = profiles.join(means, on=["Metadata_Plate", "Metadata_well_position"])
-#         ## median
-#         medians = profiles.group_by(["Metadata_Plate", "Metadata_well_position"]).agg(
-#             pl.col("Cells_Intensity_MedianIntensity_GFP").median().alias("WellIntensityMedian"),
-#         )
-#         profiles = profiles.join(medians, on=["Metadata_Plate", "Metadata_well_position"])
-#         ## mad
-#         profiles = profiles.with_columns(
-#             (pl.col("Cells_Intensity_MedianIntensity_GFP") - pl.col("WellIntensityMedian")).abs().alias("Abs_dev"),
-#         )
-#         mad = profiles.group_by(["Metadata_Plate", "Metadata_well_position"]).agg(
-#             pl.col("Abs_dev").median().alias("Intensity_MAD"),
-#         )
-#         profiles = profiles.join(mad, on=["Metadata_Plate", "Metadata_well_position"])
-    
-#         # ## Threshold is 5X
-#         # ## Used to be median well intensity + 5*mad implemented by Jess
-#         # ## Switching to mean well intensity + 5*mad implemented by Runxi
-#         # profiles = profiles.with_columns(
-#         #     (pl.col("WellIntensityMedian") + num_mad*pl.col("Intensity_MAD")).alias("Intensity_upper_threshold"), ## pl.col("WellIntensityMedian")
-#         #     (pl.col("WellIntensityMedian") - num_mad*pl.col("Intensity_MAD")).alias("Intensity_lower_threshold"), ## pl.col("WellIntensityMedian")
-#         # )
-#         # ## Filter by intensity MAD
-#         # profiles = profiles.filter(
-#         #     pl.col("Cells_Intensity_MeanIntensity_GFP") <= pl.col("Intensity_upper_threshold"),
-#         # ).filter(
-#         #     pl.col("Cells_Intensity_MeanIntensity_GFP") >= pl.col("Intensity_lower_threshold"),
-#         # )
-    
-#         # Filter out alleles with fewer than 250 cells
-#         # keep_alleles = profiles.group_by("Metadata_gene_allele").count().filter(
-#         #     pl.col("count") >= min_cells,
-#         #     ).select("Metadata_gene_allele").to_series().to_list()
-#         # profiles = profiles.filter(pl.col("Metadata_gene_allele").is_in(keep_alleles))
-    
-#         # add full crop coordinates
-#         profiles = profiles.with_columns(
-#             (pl.col("Nuclei_AreaShape_Center_X") - 50).alias("x_low").round().cast(pl.Int16),
-#             (pl.col("Nuclei_AreaShape_Center_X") + 50).alias("x_high").round().cast(pl.Int16),
-#             (pl.col("Nuclei_AreaShape_Center_Y") - 50).alias("y_low").round().cast(pl.Int16),
-#             (pl.col("Nuclei_AreaShape_Center_Y") + 50).alias("y_high").round().cast(pl.Int16),
-#         )
-    
-#         # Read in all Image.csv to get ImageNumber:SiteNumber mapping and paths
-#         image_dat = []
-#         icfs = glob.glob(os.path.join(imagecsv_dir, "**/*Image.csv"), recursive=True)
-#         for icf in tqdm(icfs):
-#             fp = icf.split('/')[-2]
-#             # print(fp)
-#             plate, well = "-".join(fp.split("-")[:-2]), fp.split("-")[-2]
-#             # print(plate, well)
-#             image_dat.append(pl.read_csv(icf).select(
-#                 [
-#                     "ImageNumber",
-#                     "Metadata_Site",
-#                     "PathName_OrigDNA",
-#                     "FileName_OrigDNA",
-#                     "FileName_OrigGFP",
-#                     ],
-#                 ).with_columns(
-#                 pl.lit(plate).alias("Metadata_Plate"),
-#                 pl.lit(well).alias("Metadata_well_position"),
-#                 ))
-#         image_dat = pl.concat(image_dat).rename({"ImageNumber": "Metadata_ImageNumber"})
-    
-#         # Create useful filepaths
-#         image_dat = image_dat.with_columns(
-#             pl.col("PathName_OrigDNA").str.replace(".*cpg0020-varchamp/", "").alias("Path_root"),
-#         )
-    
-#         image_dat = image_dat.drop([
-#             "PathName_OrigDNA",
-#             "FileName_OrigDNA",
-#             "FileName_OrigGFP",
-#             "Path_root",
-#         ])
-#         # print(image_dat)
-    
-#         # Append to profiles
-#         profiles = profiles.join(image_dat, on = ["Metadata_Plate", "Metadata_well_position", "Metadata_ImageNumber"])
-    
-#         # Sort by allele, then image number
-#         profiles = profiles.with_columns(
-#             pl.concat_str(["Metadata_Plate", "Metadata_well_position", "Metadata_Site"], separator="_").alias("Metadata_SiteID"),
-#             pl.col("Metadata_gene_allele").str.replace("_", "-").alias("Protein_label"),
-#         )
-#         profiles = profiles.sort(["Protein_label", "Metadata_SiteID"])
-#         alleles = profiles.select("Protein_label").to_series().unique().to_list()
-#         batch_profiles[batch_id] = profiles
-
-# Pickle the metadata dictionary
-# with open("../../2.snakemake_pipeline/outputs/visualize_cells/batch_prof_dict.pkl", "wb") as f:
-#     pickle.dump(batch_profiles, f, pickle.HIGHEST_PROTOCOL)
-
 # To load the dictionary and DataFrames later
 with open("../../2.snakemake_pipeline/outputs/visualize_cells/batch_prof_dict.pkl", "rb") as f:
     batch_profiles = pickle.load(f)
 
+allele_meta_df = pl.read_csv(IMG_METADATA_FILE, infer_schema_length=10000)
+img_well_qc_sum_df = pl.read_csv(IMG_QC_SUM_DF_FILE, infer_schema_length=10000)
 
-def plot_allele(pm, variant, sel_channel, plate_img_qc, auroc_df=None, site="05", ref_well=[], var_well=[], max_intensity=0.99, display=False, imgs_dir="", output_dir=""):
-    assert imgs_dir != "", "Image directory has to be input!"
-    plt.clf()
-    cmap = channel_to_cmap(sel_channel)
-    channel = channel_dict[sel_channel]
-    if auroc_df is not None:
-        auroc = auroc_df.filter(pl.col("allele_0")==variant)["AUROC_Mean"].mean()
-    else:
-        auroc = ""
+with open(IMG_METADATA_DICT_FILE, "rb") as f:
+    allele_meta_df_dict = pickle.load(f)
+
+with open(IMG_QC_SUM_DICT_FILE, "rb") as f:
+    img_well_qc_sum_dict = pickle.load(f)
+
+
+def get_allele_batch(allele, score_df):
+    return score_df.filter(pl.col("gene_allele")==allele)["Metadata_Bio_Batch"].to_list()[0]
     
-    ## get the number of wells/images per allele
-    plate_map = pm.filter(pl.col("gene_allele") == variant).select("plate_map_name").to_pandas().values.flatten()
-    wt = variant.split("_")[0]
-    wt_wells = pm.filter(pl.col("gene_allele") == wt).select("imaging_well").to_pandas().values.flatten()
-    var_wells = pm.filter(pl.col("gene_allele") == variant).select("imaging_well").to_pandas().values.flatten()
-    if ref_well:
-        wt_wells = [well for well in wt_wells if well in ref_well]
-    if var_well:
-        var_wells = [well for well in var_wells if well in var_well]
-    
-    # if len(wt_wells) > 1:
-    #     # Get coordinates of wells
-    #     well_coords = [well_to_coordinates(w) for w in set([ref_well_pl for ref_well_pl in wt_wells])]
-    #     # Sort wells by max distance from edges (descending)
-    #     wt_wells = [max(well_coords, key=lambda x: compute_distance(x[1], x[2]))[0]]
-    pm_var = pm.filter((pl.col("imaging_well").is_in(np.concatenate([wt_wells, var_wells])))&(pl.col("plate_map_name").is_in(plate_map))).sort("node_type")
-
-    fig, axes = plt.subplots((len(wt_wells)+len(var_wells))*2, 4, figsize=(15, (len(wt_wells)+len(var_wells))*8), sharex=True, sharey=True)
-    for wt_var, pm_row in enumerate(pm_var.iter_rows(named=True)):
-        if "allele" in pm_row["node_type"]:
-            if pm_row["node_type"] == "allele":
-                well = var_wells[0]
-                allele = variant
-            else:
-                well = wt_wells[0]
-                allele = wt
-        else:
-            if pm_row["imaging_well"] in wt_wells:
-                well = wt_wells[0]
-                allele = wt
-            else:
-                well = var_wells[0]
-                allele = variant
-
-        for i in range(8):
-            if i < 4:
-                sel_plate = pm_row["imaging_plate_R1"]
-            else:
-                sel_plate = pm_row["imaging_plate_R2"]
-                
-            if "_" in sel_plate:
-                batch_plate_map = sel_plate.split("_")[0]
-            else:
-                batch_plate_map = sel_plate
-            
-            batch = batch_dict[batch_plate_map]
-            batch_img_dir = f'{imgs_dir}/{batch}/images'
-            
-            letter = well[0]
-            row = letter_dict[letter]
-            col = well[1:3]
-            
-            plate_img_dir = plate_dict[sel_plate][f"T{i%4+1}"]
-            img_file = f"r{row}c{col}f{site}p01-ch{channel}sk1fk1fl1.tiff"
-
-            # print(batch, well, plate_img_dir, img_file)
-            # break
-
-            if plate_img_qc is not None:
-                is_bg_array = plate_img_qc.filter(
-                    (pl.col("plate") == plate_img_dir.split("__")[0])
-                    & (pl.col("well") == well)
-                    & (pl.col("channel") == sel_channel)
-                )["is_bg"].to_numpy()
-                if is_bg_array.size > 0:
-                    is_bg = is_bg_array[0]
-                else:
-                    is_bg = True
-                    
-            if (os.path.exists(f"{batch_img_dir}/{plate_img_dir}/Images/{img_file}")):
-                img = imread(f"{batch_img_dir}/{plate_img_dir}/Images/{img_file}", as_gray=True)
-            else:
-                # Define your S3 path and local destination
-                s3_path = f's3://cellpainting-gallery/cpg0020-varchamp/broad/images/{batch}/images/{plate_img_dir}/Images/{img_file}'
-                local_path = f"{batch_img_dir}/{plate_img_dir}/Images/{img_file}"
-                # Build the aws cli command
-                cmd = ['aws', 's3', 'cp', '--no-sign-request', s3_path, local_path]
-                # Execute the command using subprocess
-                try:
-                    subprocess.run(cmd, check=True)
-                    print(f"Successfully downloaded from {s3_path} to {local_path}")
-                except subprocess.CalledProcessError as e:
-                    print(f"An error occurred: {e}")
-                img = imread(f"{batch_img_dir}/{plate_img_dir}/Images/{img_file}", as_gray=True)
-            
-            plot_idx = i+wt_var*4*2
-            # print(i, wt_var, plot_idx)
-            axes.flatten()[plot_idx].imshow(img, vmin=0, vmax=np.percentile(img, max_intensity*100), cmap=cmap)
-            plot_label = f"{sel_channel}:{sel_plate},T{i%4+1}\nWell:{well},Site:{site}\n{allele}"
-            axes.flatten()[plot_idx].text(0.03, 0.97, plot_label, color='white', fontsize=10,
-                    verticalalignment='top', horizontalalignment='left', transform=axes.flatten()[plot_idx].transAxes,
-                    bbox=dict(facecolor='black', alpha=0.3, linewidth=2))
-            if is_bg:
-                axes.flatten()[plot_idx].text(0.03, 0.03, "FLAG:\nOnly Background\nNoise is Detected", color='red', fontsize=10,
-                    verticalalignment='bottom', horizontalalignment='left', transform=axes.flatten()[plot_idx].transAxes,
-                    bbox=dict(facecolor='white', alpha=0.3, linewidth=2))
-            int_95 = str(int(round(np.percentile(img, 95))))
-            axes.flatten()[plot_idx].text(0.97, 0.03, f"95th Intensity:{int_95}\nSet vmax:{max_intensity*100:.0f}th perc.", color='white', fontsize=10,
-                           verticalalignment='bottom', horizontalalignment='right', transform=axes.flatten()[plot_idx].transAxes,
-                           bbox=dict(facecolor='black', alpha=0.3, linewidth=2))
-            axes.flatten()[plot_idx].axis("off")
-        
-    plt.tight_layout()
-    plt.subplots_adjust(wspace=.01, hspace=-0.2, top=.99)
-    
-    if display:
-        plt.show()
-    
-    if output_dir:
-        file_name = f"{variant}_{sel_channel}"
-        if auroc:
-            file_name = f"{file_name}_{auroc:.3f}"
-        if ref_well:
-            file_name = f"{file_name}_REF-{'_'.join(ref_well)}"
-        if var_well:
-            file_name = f"{file_name}_VAR-{'_'.join(var_well)}"
-        fig.savefig(os.path.join(output_dir, f"{file_name}.png"), dpi=400, bbox_inches='tight')
-        
-    plt.close(fig)
-
-
-def plot_allele_single_plate(pm, variant, sel_channel, plate_img_qc, auroc_df=None, site="05", ref_well=[], var_well=[], max_intensity=0.99, display=False, imgs_dir="", output_dir=""):
-    assert imgs_dir != "", "Image directory has to be input!"
-    plt.clf()
-    cmap = channel_to_cmap(sel_channel)
-    channel = channel_dict[sel_channel]
-    if auroc_df is not None:
-        auroc = auroc_df.filter(pl.col("allele_0")==variant)["AUROC_Mean"].mean()
-    else:
-        auroc = ""
-    
-    ## get the number of wells/images per allele
-    plate_map = pm.filter(pl.col("gene_allele") == variant).select("plate_map_name").to_pandas().values.flatten()
-    wt = variant.split("_")[0]
-    wt_wells = pm.filter(pl.col("gene_allele") == wt).select("imaging_well").to_pandas().values.flatten()
-    var_wells = pm.filter(pl.col("gene_allele") == variant).select("imaging_well").to_pandas().values.flatten()
-    
-    if ref_well:
-        wt_wells = [well for well in wt_wells if well in ref_well]
-    if var_well:
-        var_wells = [well for well in var_wells if well in var_well]
-    
-    pm_var = pm.filter(
-        (pl.col("imaging_well").is_in(np.concatenate([wt_wells, var_wells])))
-        &(pl.col("plate_map_name").is_in(plate_map))
-    ).sort(by=["gene_allele", "plate_map_name", "imaging_well"],
-           descending=[True, False, False])
-    # print(pm_var)
-    # return None
-    
-    fig, axes = plt.subplots(4, 4, figsize=(15, 2*8), sharex=True, sharey=True)
-    for plot_idx, pm_row in enumerate(pm_var.iter_rows(named=True)):
-        well = pm_row["imaging_well"]
-        allele = pm_row["gene_allele"]
-
-        if plot_idx < 4 or (plot_idx >= 8 and plot_idx < 12):
-            sel_plate = pm_row["imaging_plate_R1"]
-        else:
-            sel_plate = pm_row["imaging_plate_R2"]
-            
-        if "_" in sel_plate:
-            batch_plate_map = sel_plate.split("_")[0]
-        else:
-            batch_plate_map = sel_plate
-            
-        batch = batch_dict[batch_plate_map]
-        batch_img_dir = f'{imgs_dir}/{batch}/images'
-        
-        letter = well[0]
-        row = letter_dict[letter]
-        col = well[1:3]
-        
-        plate_img_dir = plate_dict[sel_plate]
-        img_file = f"r{row}c{col}f{site}p01-ch{channel}sk1fk1fl1.tiff"
-
-        # print(batch, well, plate_img_dir, img_file)
-        # break
-
-        if plate_img_qc is not None:
-            is_bg_array = plate_img_qc.filter(
-                (pl.col("plate") == plate_img_dir.split("__")[0])
-                & (pl.col("well") == well)
-                & (pl.col("channel") == sel_channel)
-            )["is_bg"].to_numpy()
-            if is_bg_array.size > 0:
-                is_bg = is_bg_array[0]
-            else:
-                is_bg = True
-                
-        if (os.path.exists(f"{batch_img_dir}/{plate_img_dir}/Images/{img_file}")):
-            img = imread(f"{batch_img_dir}/{plate_img_dir}/Images/{img_file}", as_gray=True)
-        else:
-            # Define your S3 path and local destination
-            s3_path = f's3://cellpainting-gallery/cpg0020-varchamp/broad/images/{batch}/images/{plate_img_dir}/Images/{img_file}'
-            local_path = f"{batch_img_dir}/{plate_img_dir}/Images/{img_file}"
-            # Build the aws cli command
-            cmd = ['aws', 's3', 'cp', '--no-sign-request', s3_path, local_path]
-            # Execute the command using subprocess
-            try:
-                subprocess.run(cmd, check=True)
-                print(f"Successfully downloaded from {s3_path} to {local_path}")
-            except subprocess.CalledProcessError as e:
-                print(f"An error occurred: {e}")
-            img = imread(f"{batch_img_dir}/{plate_img_dir}/Images/{img_file}", as_gray=True)
-        
-        # print(i, wt_var, plot_idx)
-        axes.flatten()[plot_idx].imshow(img, vmin=0, vmax=np.percentile(img, max_intensity*100), cmap=cmap)
-        plot_label = f"{sel_channel}:{sel_plate}\nWell:{well},Site:{site}\n{allele}"
-        axes.flatten()[plot_idx].text(0.03, 0.97, plot_label, color='white', fontsize=10,
-                verticalalignment='top', horizontalalignment='left', transform=axes.flatten()[plot_idx].transAxes,
-                bbox=dict(facecolor='black', alpha=0.3, linewidth=2))
-        if is_bg:
-            axes.flatten()[plot_idx].text(0.03, 0.03, "FLAG:\nOnly Background\nNoise is Detected", color='red', fontsize=10,
-                verticalalignment='bottom', horizontalalignment='left', transform=axes.flatten()[plot_idx].transAxes,
-                bbox=dict(facecolor='white', alpha=0.3, linewidth=2))
-        int_95 = str(int(round(np.percentile(img, 95))))
-        axes.flatten()[plot_idx].text(0.97, 0.03, f"95th Intensity:{int_95}\nSet vmax:{max_intensity*100:.0f}th perc.", color='white', fontsize=10,
-                       verticalalignment='bottom', horizontalalignment='right', transform=axes.flatten()[plot_idx].transAxes,
-                       bbox=dict(facecolor='black', alpha=0.3, linewidth=2))
-        axes.flatten()[plot_idx].axis("off")
-        
-    plt.tight_layout()
-    plt.subplots_adjust(wspace=.01, hspace=-0.2, top=.99)
-    
-    if display:
-        plt.show()
-        
-    file_name = f"{variant}_{sel_channel}"
-    if auroc:
-        file_name = f"{file_name}_{auroc:.3f}"
-    if ref_well:
-        file_name = f"{file_name}_REF-{'_'.join(ref_well)}"
-    if var_well:
-        file_name = f"{file_name}_VAR-{'_'.join(var_well)}"
-        
-    if output_dir:
-        fig.savefig(os.path.join(output_dir, f"{file_name}.png"), dpi=400, bbox_inches='tight')
-    plt.close(fig)
-
 
 def crop_allele(allele: str, profile_df: pl.DataFrame, meta_plate: str, rep: str="", well: str="", site: str="") -> None:
     """Crop images and save metadata as numpy arrays for one allele.
@@ -917,7 +540,7 @@ def plot_allele_cell_single_plate(pm, variant, sel_channel, batch_profile_dict, 
 
 
 def save_allele_cell_imgs(variant, feat, batch_profile_dict, cell_ids=[], auroc_df=None, display=False, save_img=False):
-    bio_rep = get_allele_batch(variant)
+    bio_rep = get_allele_batch(variant, auroc_df)
 
     if auroc_df is not None:
         auroc_df_batch = auroc_df.with_columns(
@@ -1134,7 +757,8 @@ def plot_allele_cells_separate_figures(
     batch_profile_dict, 
     plate_img_qc, 
     compartment="Cells", 
-    dim=64, 
+    dim=64,
+    resize_fig=False,
     cell_ids=[], 
     ref_well=[], 
     var_well=[],
@@ -1176,6 +800,7 @@ def plot_allele_cells_separate_figures(
     var_wells = pm.filter(pl.col("gene_allele") == variant).select("imaging_well").to_pandas().values.flatten()
     plate_map = pm.filter(pl.col("gene_allele") == variant).select("plate_map_name").to_pandas().values.flatten()
 
+    print(plate_map)
     # Filter wells if specified
     if ref_well:
         wt_wells = [well for well in wt_wells if well in ref_well]
@@ -1200,7 +825,7 @@ def plot_allele_cells_separate_figures(
             current_wells = wt_wells  
             allele = wt
             
-        well = current_wells[0] if current_wells else None
+        well = current_wells[0] if len(current_wells) else None
         if not well:
             continue
             
@@ -1276,8 +901,11 @@ def plot_allele_cells_separate_figures(
                     
                     # print(cell_coords_df.sort("Metadata_CellID"))
                     
+                    cc = 0
                     # Process each cell in this image
                     for cell_row in cell_coords_df.iter_rows(named=True):
+                        if cc == 50:
+                            break
                         x, y = int(cell_row["Nuclei_AreaShape_Center_X"]), int(cell_row["Nuclei_AreaShape_Center_Y"])
                         site = f"0{cell_row['Metadata_Site']}"
                         img_file = f"r{row}c{col}f{site}p01-ch{channel}sk1fk1fl1.tiff"
@@ -1296,26 +924,32 @@ def plot_allele_cells_separate_figures(
                                 y_min:y_max, x_min:x_max
                             ]
                         elif compartment == "Nuclei":
-                            x_min, x_max = int(cell_row["Nuclei_AreaShape_BoundingBoxMinimum_X"]), int(cell_row["Nuclei_AreaShape_BoundingBoxMaximum_X"])
-                            y_min, y_max = int(cell_row["Nuclei_AreaShape_BoundingBoxMinimum_Y"]), int(cell_row["Nuclei_AreaShape_BoundingBoxMaximum_Y"]) 
-                            # x, y = int(cell_allele_coord_df["Cells_AreaShape_Center_X"].to_numpy()[0]), int(cell_allele_coord_df["Cells_AreaShape_Center_Y"].to_numpy()[0])
+                            # x_min, x_max = int(cell_row["Nuclei_AreaShape_BoundingBoxMinimum_X"]), int(cell_row["Nuclei_AreaShape_BoundingBoxMaximum_X"])
+                            # y_min, y_max = int(cell_row["Nuclei_AreaShape_BoundingBoxMinimum_Y"]), int(cell_row["Nuclei_AreaShape_BoundingBoxMaximum_Y"]) 
+                            x, y = int(cell_row["Cells_AreaShape_Center_X"]), int(cell_row["Cells_AreaShape_Center_Y"])
                             ## flip the x and y for visualization
+                            # img_sub = img[
+                            #     y_min:y_max, x_min:x_max
+                            # ]
                             img_sub = img[
-                                y_min:y_max, x_min:x_max
+                                y-dim//2:y+dim//2, x-dim//2:x+dim//2
                             ]
                         else:
                             img_sub = img[
                                 y-dim//2:y+dim//2, x-dim//2:x+dim//2
                             ]
                             
-                        # # Quality filters
-                        # if (img_sub.shape[0] == 0 or img_sub.shape[1] == 0 or 
-                        #     np.percentile(img_sub, 90) <= np.median(img) or 
-                        #     np.var(img_sub) < 1e4 or 
-                        #     np.percentile(img_sub, 99) / np.percentile(img_sub, 25) < 2):
-                        #     continue
-
-                        img_sub = resize(img_sub, (dim, dim), preserve_range=True, anti_aliasing=True)
+                        # Quality filters
+                        if ((img_sub.shape[0] == 0 or img_sub.shape[1] == 0 or 
+                            np.percentile(img_sub, 90) <= np.median(img) or 
+                            np.var(img_sub) < 1e4 or 
+                            np.percentile(img_sub, 99) / np.percentile(img_sub, 25) < 2) and 
+                            len(sel_channels) == 1):
+                            continue
+                        
+                        if resize_fig:
+                            img_sub = resize(img_sub, (dim, dim), preserve_range=True, anti_aliasing=True)
+                        
                         # Store cell data if not exists
                         cell_id = cell_row["Metadata_CellID"]
                         if cell_id not in target_cell_dict:
@@ -1340,6 +974,7 @@ def plot_allele_cells_separate_figures(
                                     f'intensity_95_{sel_channel}': np.percentile(img_sub, 95)
                                 }
                             )
+                        cc += 1
                 except Exception as e:
                     print(f"Error processing {allele} {timepoint}: {e}")
                     continue
@@ -1444,6 +1079,161 @@ def viz_cell_crop_multi(cell, max_intensity=0.99, ax=None, axis_off=True):
                 verticalalignment='top', horizontalalignment='left', 
                 transform=ax.transAxes,
                 bbox=dict(facecolor='black', alpha=0.2, linewidth=1))
+    
+
+def plot_var_key_feat_cell_crops(variant, key_feat_sel, auroc_df, sel_channel=["GFP"], compartment="Cells", resize_fig=False, top_num=200):
+    batch_profiles_filtered = {}
+    bio_rep = get_allele_batch(variant, auroc_df)
+    # for bio_rep, bio_rep_batches in BIO_REP_BATCHES_DICT.items():
+    for batch_id in BIO_REP_BATCHES_DICT[bio_rep]:
+        # imagecsv_dir = IMG_ANALYSIS_DIR.format(batch_id) #f"../../../8.1_upstream_analysis_runxi/2.raw_img_qc/inputs/images/{batch_id}/analysis"
+        prof_path = BATCH_PROFILES_GFP_FILTERED.format(batch_id)
+        # print(prof_path)
+        # Get metadata
+        profiles_filt = pl.scan_parquet(prof_path).select(
+            ["Metadata_well_position", "Metadata_ImageNumber", "Metadata_ObjectNumber", "Metadata_Plate", 
+             "Metadata_refvar_gfp_adj_classify", GFP_INTENSITY_COLUMN, key_feat_sel
+            #  "Nuclei_AreaShape_BoundingBoxMaximum_X", "Nuclei_AreaShape_BoundingBoxMaximum_Y", 
+            #  "Nuclei_AreaShape_BoundingBoxMinimum_X", "Nuclei_AreaShape_BoundingBoxMinimum_Y", 
+            # "Nuclei_AreaShape_Area", "Cells_AreaShape_Area", "Nuclei_AreaShape_Center_X", "Nuclei_AreaShape_Center_Y",
+            # "Cells_AreaShape_BoundingBoxMaximum_X", "Cells_AreaShape_BoundingBoxMaximum_Y", "Cells_AreaShape_BoundingBoxMinimum_X",
+            # "Cells_AreaShape_BoundingBoxMinimum_Y",	"Cells_AreaShape_Center_X",	"Cells_AreaShape_Center_Y",
+            # "Cells_Intensity_MeanIntensity_GFP", "Cells_Intensity_MedianIntensity_GFP", "Cells_Intensity_IntegratedIntensity_GFP"
+            ],
+        ).collect()
+        # display(profiles_filt)
+        # print(prof_path)
+        # Sort by allele, then image number
+        profiles_filt = profiles_filt.with_columns(
+            # pl.concat_str(["Metadata_Plate", "Metadata_well_position", "Metadata_Site"], separator="_").alias("Metadata_SiteID"),
+            pl.concat_str(
+                [
+                    "Metadata_Plate",
+                    "Metadata_well_position",
+                    "Metadata_ImageNumber",
+                    "Metadata_ObjectNumber",
+                ],
+                separator="_",
+            ).alias("Metadata_CellID"),
+        ).select(["Metadata_CellID", "Metadata_refvar_gfp_adj_classify", GFP_INTENSITY_COLUMN, key_feat_sel]).join(
+            batch_profiles[batch_id], on="Metadata_CellID", how="inner"
+        )
+        # display(profiles_filt)
+        # print(batch_profiles[batch_id].select(["Nuclei_AreaShape_BoundingBoxMaximum_X", "Nuclei_AreaShape_BoundingBoxMaximum_Y"]).head())
+        # profiles = profiles.sort(["Protein_label", "Metadata_SiteID"])
+        # alleles = profiles.select("Protein_label").to_series().unique().to_list()
+        batch_profiles_filtered[batch_id] = profiles_filt
+
+    select_cell_ids_df = pl.DataFrame()
+    # for bio_rep, bio_rep_batches in BIO_REP_BATCHES_DICT.items():
+    for batch_id in BIO_REP_BATCHES_DICT[bio_rep]:
+        select_cell_ids_df = pl.concat([
+            select_cell_ids_df,
+            batch_profiles_filtered[batch_id].filter(
+                (pl.col("Metadata_refvar_gfp_adj_classify").str.contains(variant)),
+                # (pl.col("Cells_AreaShape_Area") < 7000) & (pl.col("Cells_AreaShape_Area") > 5000),
+            ).sort("Metadata_gene_allele")
+        ])
+    # print(select_cell_ids_df[GFP_INTENSITY_COLUMN].max(), select_cell_ids_df[GFP_INTENSITY_COLUMN].min())
+    
+    var_gfp = select_cell_ids_df.filter(
+          pl.col("Metadata_gene_allele")==variant
+    )[GFP_INTENSITY_COLUMN].to_numpy()
+    ref_gfp = select_cell_ids_df.filter(
+          pl.col("Metadata_gene_allele")!=variant
+    )[GFP_INTENSITY_COLUMN].to_numpy()
+    
+    gfp_results = find_optimal_gfp_range_fast(
+        ref_gfp, var_gfp, quantile_pair=(.2, .8), min_cells_per_well=20
+    )
+    plt.clf()
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4))
+    sns.boxenplot(
+        data=select_cell_ids_df.to_pandas(), y=key_feat_sel, x="Metadata_gene_allele", ax=axes[0]
+    )
+    sns.boxenplot(
+        data=select_cell_ids_df.to_pandas(), y=GFP_INTENSITY_COLUMN, x="Metadata_gene_allele", ax=axes[1]
+    )
+    plt.show()
+
+    cell_ids = []
+    cell_ids_df = select_cell_ids_df.filter(
+        (pl.col(GFP_INTENSITY_COLUMN) > gfp_results[0]) & (pl.col(GFP_INTENSITY_COLUMN) < gfp_results[1])
+    )
+    # Calculate means for each group
+    variant_mean = select_cell_ids_df.filter(pl.col("Metadata_gene_allele") == variant)[key_feat_sel].mean()
+    non_variant_mean = select_cell_ids_df.filter(pl.col("Metadata_gene_allele") != variant)[key_feat_sel].mean()
+
+    if variant_mean > non_variant_mean:
+        # Variant higher: top 50 variant, bottom 50 non-variant
+        variant_cells = select_cell_ids_df.filter(
+            pl.col("Metadata_gene_allele") == variant
+        ).sort(key_feat_sel, descending=True).head(top_num)["Metadata_CellID"].to_list()
+        
+        non_variant_cells = select_cell_ids_df.filter(
+            pl.col("Metadata_gene_allele") != variant
+        ).sort(key_feat_sel, descending=False).head(top_num)["Metadata_CellID"].to_list()
+    else:
+        # Non-variant higher: bottom 50 variant, top 50 non-variant
+        variant_cells = select_cell_ids_df.filter(
+            pl.col("Metadata_gene_allele") == variant
+        ).sort(key_feat_sel, descending=False).head(top_num)["Metadata_CellID"].to_list()
+        
+        non_variant_cells = select_cell_ids_df.filter(
+            pl.col("Metadata_gene_allele") != variant
+        ).sort(key_feat_sel, descending=True).head(top_num)["Metadata_CellID"].to_list()
+
+    cell_ids += (variant_cells + non_variant_cells)
+
+    cell_img_dict = plot_allele_cells_separate_figures(
+        pm=allele_meta_df_dict[bio_rep],
+        variant=variant,
+        sel_channels=sel_channel, 
+        batch_profile_dict=batch_profiles_filtered,
+        plate_img_qc=img_well_qc_sum_dict[bio_rep],
+        compartment=compartment,
+        target_feat=key_feat_sel,
+        resize_fig=resize_fig,
+        cell_ids=cell_ids,  # Uncomment to use specific cells
+        imgs_dir=TIFF_IMGS_DIR,
+        n_cells=50
+    )
+
+    var_data = {k: v for k, v in cell_img_dict.items() if v['allele']==variant}
+    ref_data = {k: v for k, v in cell_img_dict.items() if v['allele']!=variant}
+
+    var_data = sorted(var_data.items(), key=lambda x : x[1][key_feat_sel], reverse=True)
+    ref_data = sorted(ref_data.items(), key=lambda x : x[1][key_feat_sel], reverse=False)
+    print("Var len:", len(var_data), "Ref len:", len(ref_data))
+
+    plt.clf()
+    fig, axes = plt.subplots(3, 10, figsize=(25, 30))
+    for idx, (cell_id, cell) in enumerate(ref_data[:30]):
+        ## plot nuc
+        if len(sel_channel) == 1:
+            viz_cell_crop(cell, sel_channel[0], ax=axes[idx // 10, idx % 10])
+        else:
+            viz_cell_crop_multi(cell, ax=axes[idx // 10, idx % 10])
+        # axes[idx // 10, idx % 10].set_title("\n".join([ex_meta[cell,1].split("_T")[0], "T"+ex_meta[cell,1].split("_T")[1]+"|nuc"]), fontsize=7)
+        # axes[idx // 10 + 1, idx % 10].set_title("\n".join([ex_meta[cell,1].split("_T")[0], "T"+ex_meta[cell,1].split("_T")[1]+"|pro"]), fontsize=7)
+    plt.subplots_adjust(wspace=0.05, hspace=-.9)
+    plt.suptitle(f"Differential Feature: {key_feat_sel}", fontsize=12, y=.6)
+    plt.show()
+
+    plt.clf()
+    fig, axes = plt.subplots(3, 10, figsize=(25, 30))
+    for idx, (cell_id, cell) in enumerate(var_data[:30]):
+        # print(idx)
+        ## plot nuc
+        if len(sel_channel) == 1:
+            viz_cell_crop(cell, sel_channel[0], ax=axes[idx // 10, idx % 10])
+        else:
+            viz_cell_crop_multi(cell, ax=axes[idx // 10, idx % 10])
+        # axes[idx // 10, idx % 10].set_title("\n".join([ex_meta[cell,1].split("_T")[0], "T"+ex_meta[cell,1].split("_T")[1]+"|nuc"]), fontsize=7)
+        # axes[idx // 10 + 1, idx % 10].set_title("\n".join([ex_meta[cell,1].split("_T")[0], "T"+ex_meta[cell,1].split("_T")[1]+"|pro"]), fontsize=7)
+    plt.subplots_adjust(wspace=0.05, hspace=-.9)
+    plt.suptitle(f"Differential Feature: {key_feat_sel}", fontsize=12, y=.6)
+    plt.show()
         
 
 # GFP range optimization function with expanded ranges and ratio constraint
@@ -1510,157 +1300,6 @@ def find_optimal_gfp_range_fast(ref_gfp: np.ndarray, var_gfp: np.ndarray,
     else:
         return None, None, 0, 0, "NO_SUITABLE_RANGE"
     
-
-def plot_var_key_feat_cell_crops(variant, key_feat_sel, sel_channel=["GFP"], compartment="Cells", top_num=50):
-    batch_profiles_filtered = {}
-    for bio_rep, bio_rep_batches in BIO_REP_BATCHES_DICT.items():
-        for batch_id in BIO_REP_BATCHES_DICT[bio_rep]:
-            imagecsv_dir = IMG_ANALYSIS_DIR.format(batch_id) #f"../../../8.1_upstream_analysis_runxi/2.raw_img_qc/inputs/images/{batch_id}/analysis"
-            prof_path = BATCH_PROFILES_GFP_FILTERED.format(batch_id)
-            # print(prof_path)
-            # Get metadata
-            profiles_filt = pl.scan_parquet(prof_path).select(
-                ["Metadata_well_position", "Metadata_ImageNumber", "Metadata_ObjectNumber", "Metadata_Plate", 
-                 "Metadata_refvar_gfp_adj_classify", key_feat_sel, GFP_INTENSITY_COLUMN,
-                #  "Nuclei_AreaShape_BoundingBoxMaximum_X", "Nuclei_AreaShape_BoundingBoxMaximum_Y", 
-                #  "Nuclei_AreaShape_BoundingBoxMinimum_X", "Nuclei_AreaShape_BoundingBoxMinimum_Y", 
-                # "Nuclei_AreaShape_Area", "Cells_AreaShape_Area", "Nuclei_AreaShape_Center_X", "Nuclei_AreaShape_Center_Y",
-                # "Cells_AreaShape_BoundingBoxMaximum_X", "Cells_AreaShape_BoundingBoxMaximum_Y", "Cells_AreaShape_BoundingBoxMinimum_X",
-                # "Cells_AreaShape_BoundingBoxMinimum_Y",	"Cells_AreaShape_Center_X",	"Cells_AreaShape_Center_Y",
-                # "Cells_Intensity_MeanIntensity_GFP", "Cells_Intensity_MedianIntensity_GFP", "Cells_Intensity_IntegratedIntensity_GFP"
-                ],
-            ).collect()
-            print(prof_path)
-            # Sort by allele, then image number
-            profiles_filt = profiles_filt.with_columns(
-                # pl.concat_str(["Metadata_Plate", "Metadata_well_position", "Metadata_Site"], separator="_").alias("Metadata_SiteID"),
-                pl.concat_str(
-                    [
-                        "Metadata_Plate",
-                        "Metadata_well_position",
-                        "Metadata_ImageNumber",
-                        "Metadata_ObjectNumber",
-                    ],
-                    separator="_",
-                ).alias("Metadata_CellID"),
-            ).select(["Metadata_CellID", "Metadata_refvar_gfp_adj_classify", key_feat_sel, GFP_INTENSITY_COLUMN]).join(
-                batch_profiles[batch_id], on="Metadata_CellID", how="inner"
-            )
-            # print(batch_profiles[batch_id].select(["Nuclei_AreaShape_BoundingBoxMaximum_X", "Nuclei_AreaShape_BoundingBoxMaximum_Y"]).head())
-            # profiles = profiles.sort(["Protein_label", "Metadata_SiteID"])
-            # alleles = profiles.select("Protein_label").to_series().unique().to_list()
-            batch_profiles_filtered[batch_id] = profiles_filt
-
-    select_cell_ids_df = pl.DataFrame()
-    for bio_rep, bio_rep_batches in BIO_REP_BATCHES_DICT.items():
-        for batch_id in BIO_REP_BATCHES_DICT[bio_rep]:
-            select_cell_ids_df = pl.concat([
-                select_cell_ids_df,
-                batch_profiles_filtered[batch_id].filter(
-                    (pl.col("Metadata_refvar_gfp_adj_classify").str.contains(variant)),
-                    # (pl.col("Cells_AreaShape_Area") < 7000) & (pl.col("Cells_AreaShape_Area") > 5000),
-                ).sort("Metadata_gene_allele")
-            ])
-    # print(select_cell_ids_df[GFP_INTENSITY_COLUMN].max(), select_cell_ids_df[GFP_INTENSITY_COLUMN].min())
-    
-    var_gfp = select_cell_ids_df.filter(
-          pl.col("Metadata_gene_allele")==variant
-    )[GFP_INTENSITY_COLUMN].to_numpy()
-    ref_gfp = select_cell_ids_df.filter(
-          pl.col("Metadata_gene_allele")!=variant
-    )[GFP_INTENSITY_COLUMN].to_numpy()
-    
-    gfp_results = find_optimal_gfp_range_fast(
-        ref_gfp, var_gfp, quantile_pair=(.2, .8), min_cells_per_well=20
-    )
-    plt.clf()
-    fig, axes = plt.subplots(1, 2, figsize=(10, 4))
-    sns.boxenplot(
-        data=select_cell_ids_df.to_pandas(), y=key_feat_sel, x="Metadata_gene_allele", ax=axes[0]
-    )
-    sns.boxenplot(
-        data=select_cell_ids_df.to_pandas(), y=GFP_INTENSITY_COLUMN, x="Metadata_gene_allele", ax=axes[1]
-    )
-    plt.show()
-
-    cell_ids = []
-    cell_ids_df = select_cell_ids_df.filter(
-        (pl.col(GFP_INTENSITY_COLUMN) > gfp_results[0]) & (pl.col(GFP_INTENSITY_COLUMN) < gfp_results[1])
-    )
-    # Calculate means for each group
-    variant_mean = select_cell_ids_df.filter(pl.col("Metadata_gene_allele") == variant)[key_feat_sel].mean()
-    non_variant_mean = select_cell_ids_df.filter(pl.col("Metadata_gene_allele") != variant)[key_feat_sel].mean()
-
-    if variant_mean > non_variant_mean:
-        # Variant higher: top 50 variant, bottom 50 non-variant
-        variant_cells = select_cell_ids_df.filter(
-            pl.col("Metadata_gene_allele") == variant
-        ).sort(key_feat_sel, descending=True).head(top_num)["Metadata_CellID"].to_list()
-        
-        non_variant_cells = select_cell_ids_df.filter(
-            pl.col("Metadata_gene_allele") != variant
-        ).sort(key_feat_sel, descending=False).head(top_num)["Metadata_CellID"].to_list()
-    else:
-        # Non-variant higher: bottom 50 variant, top 50 non-variant
-        variant_cells = select_cell_ids_df.filter(
-            pl.col("Metadata_gene_allele") == variant
-        ).sort(key_feat_sel, descending=False).head(top_num)["Metadata_CellID"].to_list()
-        
-        non_variant_cells = select_cell_ids_df.filter(
-            pl.col("Metadata_gene_allele") != variant
-        ).sort(key_feat_sel, descending=True).head(top_num)["Metadata_CellID"].to_list()
-
-    cell_ids += (variant_cells + non_variant_cells)
-
-    cell_img_dict = plot_allele_cells_separate_figures(
-        pm=allele_meta_df_dict[bio_rep],
-        variant=variant,
-        sel_channels=sel_channel, 
-        batch_profile_dict=batch_profiles_filtered,
-        plate_img_qc=img_well_qc_sum_dict[bio_rep],
-        compartment=compartment,
-        target_feat=key_feat_sel,
-        cell_ids=cell_ids,  # Uncomment to use specific cells
-        imgs_dir=TIFF_IMGS_DIR,
-        n_cells=50
-    )
-
-    var_data = {k: v for k, v in cell_img_dict.items() if v['allele']==variant}
-    ref_data = {k: v for k, v in cell_img_dict.items() if v['allele']!=variant}
-
-    var_data = sorted(var_data.items(), key=lambda x : x[1][key_feat_sel], reverse=True)
-    ref_data = sorted(ref_data.items(), key=lambda x : x[1][key_feat_sel], reverse=False)
-    print("Var len:", len(var_data), "Ref len:", len(ref_data))
-
-    plt.clf()
-    fig, axes = plt.subplots(3, 10, figsize=(25, 30))
-    for idx, (cell_id, cell) in enumerate(ref_data[:30]):
-        ## plot nuc
-        if len(sel_channel) == 1:
-            viz_cell_crop(cell, sel_channel[0], ax=axes[idx // 10, idx % 10])
-        else:
-            viz_cell_crop_multi(cell, ax=axes[idx // 10, idx % 10])
-        # axes[idx // 10, idx % 10].set_title("\n".join([ex_meta[cell,1].split("_T")[0], "T"+ex_meta[cell,1].split("_T")[1]+"|nuc"]), fontsize=7)
-        # axes[idx // 10 + 1, idx % 10].set_title("\n".join([ex_meta[cell,1].split("_T")[0], "T"+ex_meta[cell,1].split("_T")[1]+"|pro"]), fontsize=7)
-    plt.subplots_adjust(wspace=0.05, hspace=-.9)
-    plt.suptitle(f"Differential Feature: {key_feat_sel}", fontsize=12, y=.6)
-    plt.show()
-
-    plt.clf()
-    fig, axes = plt.subplots(3, 10, figsize=(25, 30))
-    for idx, (cell_id, cell) in enumerate(var_data[:30]):
-        # print(idx)
-        ## plot nuc
-        if len(sel_channel) == 1:
-            viz_cell_crop(cell, sel_channel[0], ax=axes[idx // 10, idx % 10])
-        else:
-            viz_cell_crop_multi(cell, ax=axes[idx // 10, idx % 10])
-        # axes[idx // 10, idx % 10].set_title("\n".join([ex_meta[cell,1].split("_T")[0], "T"+ex_meta[cell,1].split("_T")[1]+"|nuc"]), fontsize=7)
-        # axes[idx // 10 + 1, idx % 10].set_title("\n".join([ex_meta[cell,1].split("_T")[0], "T"+ex_meta[cell,1].split("_T")[1]+"|pro"]), fontsize=7)
-    plt.subplots_adjust(wspace=0.05, hspace=-.9)
-    plt.suptitle(f"Differential Feature: {key_feat_sel}", fontsize=12, y=.6)
-    plt.show()
-
 
 # def plot_allele_cell_multi(pm, variant, sel_channel, batch_profile_dict, auroc_df, plate_img_qc, site="05", ref_well=[], var_well=[], max_intensity=0.99, display=False, imgs_dir=TIFF_IMGS_DIR, output_dir=""):
 #     # Detect input type
