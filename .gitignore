@@ -187,3 +187,6 @@ snakemake_pipeline/*$py.class
 
 ## local claude
 .claude/
+
+# VSCode personal settings
+.vscode/

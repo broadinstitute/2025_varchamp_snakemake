@@ -9,7 +9,7 @@ def __(mo):
     mo.md(
         r"""
         # Calculate plate background and conduct imaging well QC
-
+        
         Calculate 384-well plate background and conduct the QC process for each imaging well
         """
     )
@@ -23,7 +23,7 @@ def __():
 
 
 @app.cell
-def __():
+def __(__file__):
     import argparse
     import os
     import re
@@ -46,29 +46,38 @@ def __():
     channel_dict_rev = {v: k for k, v in channel_dict.items()}
     PERCENTILE_ARRAY = np.array([25,50,75,80,90,95,99])
 
-    p = argparse.ArgumentParser(__doc__)
-    p.add_argument("--batch_list", help="batch to process")
-    p.add_argument("--input_dir", type=str)
-    p.add_argument("--output_dir", type=str)
-    p.add_argument("--workers", type=int, default=256, help="Number of parallel workers")
-    args = p.parse_args()
+    # Check if running in marimo environment
+    import sys
+    running_in_marimo = 'marimo' in sys.modules and hasattr(sys, 'argv') and any('marimo' in arg for arg in sys.argv)
 
-    batch_list = args.batch_list
-    TIFF_IMG_DIR = args.input_dir #"../inputs/cpg_imgs"
-    output_dir = args.output_dir
-    workers = args.workers
+    if running_in_marimo:
+        # Running in marimo - use default/hardcoded values
+        batch_list = "2024_01_23_Batch_7,2024_02_06_Batch_8,2025_03_17_Batch_15,2025_03_17_Batch_16"
+        # batch_list = "2024_12_09_Batch_11,2024_12_09_Batch_12"
+        TIFF_IMG_DIR = "../inputs/cpg_imgs"
+        output_dir = "../outputs/sum_stats_parquet"
+        workers = 128
+    else:
+        # Running from command line - parse arguments
+        p = argparse.ArgumentParser(__doc__)
+        p.add_argument("--batch_list", help="batch to process")
+        p.add_argument("--input_dir", type=str)
+        p.add_argument("--output_dir", type=str)
+        p.add_argument("--workers", type=int, default=256, help="Number of parallel workers")
+        args = p.parse_args()
 
-    # batch_list = "2024_01_23_Batch_7,2024_02_06_Batch_8,2025_03_17_Batch_15,2025_03_17_Batch_16"
-    # batch_list = "2024_12_09_Batch_11,2024_12_09_Batch_12"
-    # output_dir = "../outputs/sum_stats_parquet"
-    # workers = 128
-    
+        batch_list = args.batch_list
+        TIFF_IMG_DIR = args.input_dir
+        output_dir = args.output_dir
+        workers = args.workers
+
     batches = batch_list.split(",")
     return (
         PERCENTILE_ARRAY,
         TIFF_IMG_DIR,
         ThreadPoolExecutor,
         argparse,
+        args,
         as_completed,
         batch_list,
         batches,
@@ -81,8 +90,10 @@ def __():
         np,
         os,
         output_dir,
+        p,
         pl,
         re,
+        sys,
         tqdm,
         workers,
     )
@@ -90,7 +101,7 @@ def __():
 
 @app.cell
 def __(mo):
-    mo.md(r"""## Calculate the plate background and summary statistics per plate and well""")
+    mo.md(r"## Calculate the plate background and summary statistics per plate and well")
     return
 
 
@@ -208,7 +219,7 @@ def __(
         output_dict.update(pct_values)
         return output_dict
 
-        
+
     # def summarize_img_parallel(tiff_imgs, output_dict, workers=128, max_gray=65535):
     #     """
     #     Summarize TIFF images in parallel:
@@ -293,7 +304,7 @@ def __(
                     }
                     channel_tiffs = f"{TIFF_IMG_DIR}/{batch}/images/{plate}/Images/{well}*-ch{channel}sk*.tiff"
                     plate_well_channel_imgs.append((channel_tiffs, plate_well_channel))
-                        
+
                 ## map a tiff to its plate_channel
                 plate_channel_tiffs = glob.glob(f"{TIFF_IMG_DIR}/{batch}/images/{plate}/Images/*ch{channel}sk*.tiff", recursive=True)
                 if plate_channel_tiffs:
@@ -313,7 +324,7 @@ def __(
             for fut in tqdm(as_completed(ps_res), total=len(ps_res), desc="Processing tiffs per plate"):
                 result = fut.result()
                 plate_sum_stats.append(result)
-                
+
         plate_well_sum_stats = []
         with ThreadPoolExecutor(max_workers=workers) as exe:
             # submit each (tiff_imgs, output_dict) pair as separate job
@@ -324,20 +335,20 @@ def __(
             for fut in tqdm(as_completed(pws_res), total=len(pws_res), desc="Processing tiffs per well"):
                 result = fut.result()
                 plate_well_sum_stats.append(result)
-        
+
         if not os.path.exists(os.path.join(output_dir, batch)):
             os.makedirs(os.path.join(output_dir, batch))
-            
+
         df_plate = pl.DataFrame(plate_sum_stats)
         df_plate.write_parquet(os.path.join(output_dir, batch, "plate_sum_stats.parquet"))
 
         df_plate_well = pl.DataFrame(plate_well_sum_stats, infer_schema_length=100000)
         df_plate_well.write_parquet(os.path.join(output_dir, batch, "plate_well_sum_stats.parquet"))
-        
     return (
         batch,
         channel,
         channel_tiffs,
+        df_plate,
         df_plate_well,
         exe,
         fut,
@@ -346,11 +357,13 @@ def __(
         plate_channel,
         plate_channel_imgs,
         plate_channel_tiffs,
+        plate_sum_stats,
         plate_unique_wells,
         plate_well_channel,
         plate_well_channel_imgs,
         plate_well_sum_stats,
         plates,
+        ps_res,
         pws_res,
         result,
         well,

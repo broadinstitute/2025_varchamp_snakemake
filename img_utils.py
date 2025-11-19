@@ -114,27 +114,9 @@ channel_dict = {
     "Brightfield": "7",
 }
 
-
-## Letter dict to convert well position to img coordinates
-letter_dict = {
-    "A": "01",
-    "B": "02",
-    "C": "03",
-    "D": "04",
-    "E": "05",
-    "F": "06",
-    "G": "07",
-    "H": "08",
-    "I": "09",
-    "J": "10",
-    "K": "11",
-    "L": "12",
-    "M": "13",
-    "N": "14",
-    "O": "15",
-    "P": "16",
-}
-
+letter_dict_rev = {v: k for k, v in letter_dict.items()}
+channel_dict_rev = {v: k for k, v in channel_dict.items()}
+channel_list = list(channel_dict_rev.values())[:-3]
 
 ## Define mapping between simple names and folder names
 batch_dict = {
@@ -298,13 +280,13 @@ plate_dict = {
 
 def channel_to_cmap(channel):
     if channel == "GFP":
-        cmap = mpl.colors.LinearSegmentedColormap.from_list("green_cmap", ["#000","#65fe08"])
+        cmap = mpl.colors.LinearSegmentedColormap.from_list("gfp_cmap", ["#000","#65fe08"])
     elif channel == "DAPI":
-        cmap = mpl.colors.LinearSegmentedColormap.from_list("green_cmap", ["#000","#0000FF"])
+        cmap = mpl.colors.LinearSegmentedColormap.from_list("dapi_cmap", ["#000","#0000FF"])
     elif channel == "Mito":
-        cmap = mpl.colors.LinearSegmentedColormap.from_list("green_cmap", ["#000","#FF0000"]) 
+        cmap = mpl.colors.LinearSegmentedColormap.from_list("mito_cmap", ["#000","#FF0000"])
     elif channel == "AGP":
-        cmap = mpl.colors.LinearSegmentedColormap.from_list("green_cmap", ["#000","#FFFF00"]) 
+        cmap = mpl.colors.LinearSegmentedColormap.from_list("agp_cmap", ["#000","#FFFF00"])
     else:
         cmap = "gray"
     return cmap
