@@ -730,3 +730,577 @@ def experimental_runner_plate_rep_gfp_filtered(
     err_logger.write(f"Logging errors when running real experiments w/ {feat_type} features finished.\n")
     err_logger.write(f"===========================================================================\n\n")
     return df_feat, df_result, df_filtered_cells
+
+
+"""
+    GFP-filtered control group classification functions
+    These functions apply GFP intensity matching to control allele comparisons
+"""
+def control_group_runner_gfp_filtered(
+    ctrl_dframe: pd.DataFrame,
+    pq_writer,
+    log_file,
+    feat_type="GFP",
+    min_cells_per_well=20,
+    group_key_one="Metadata_gene_allele",
+    group_key_two="Metadata_plate_map_name",
+    group_key_three="Metadata_well_position",
+    threshold_key="Metadata_well_position"
+):
+    """
+    Run null control experiments with GFP intensity filtering (single-rep layout).
+    Compares different wells of the SAME allele with matched GFP intensities.
+
+    Parameters:
+    -----------
+    ctrl_dframe : pd.DataFrame
+        Control alleles dataframe (TC, NC, PC)
+    pq_writer : ParquetWriter
+        Writer for prediction outputs
+    log_file : file object
+        Log file for writing status messages
+    feat_type : str
+        Feature type (should be "GFP" for GFP filtering)
+    min_cells_per_well : int
+        Minimum cells required per well after filtering
+    group_key_one : str
+        Primary grouping key (allele)
+    group_key_two : str
+        Secondary grouping key (platemap)
+    group_key_three : str
+        Tertiary grouping key (well position)
+    threshold_key : str
+        Key for checking replicates
+
+    Returns:
+    --------
+    df_feat : pd.DataFrame
+        Feature importance dataframe
+    df_result : pd.DataFrame
+        Classifier info dataframe
+    df_filtered_cells : pd.DataFrame
+        GFP-matched cells dataframe
+    """
+    from itertools import combinations
+
+    ctrl_dframe = get_classifier_features(ctrl_dframe, feat_type)
+    feat_cols = find_feat_cols(ctrl_dframe)
+    feat_cols = [i for i in feat_cols if i != "Label"]
+
+    if len(feat_cols) == 0:
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+
+    group_list = []
+    pair_list = []
+    feat_list = []
+    info_list = []
+    filtered_cell_list = []
+
+    log_file.write(f"Running XGBboost classifiers w/ {feat_type} features on control alleles with GFP filtering:\n")
+    ## First group the df by alleles
+    groups = ctrl_dframe.groupby(group_key_one).groups
+    for key in tqdm(groups.keys()):
+        # groupby alleles
+        dframe_grouped = ctrl_dframe.loc[groups[key]].reset_index(drop=True)
+        # Skip controls with no replicates
+        if dframe_grouped[threshold_key].unique().size < 2:
+            continue
+
+        # group by platemap
+        subgroups = dframe_grouped.groupby(group_key_two).groups
+        for key_two in subgroups.keys():
+            dframe_grouped_two = dframe_grouped.loc[subgroups[key_two]].reset_index(
+                drop=True
+            )
+            # If a well is not present on all four plates, drop well
+            well_count = dframe_grouped_two.groupby(["Metadata_Well"])[
+                "Metadata_Plate"
+            ].nunique()
+            well_to_drop = well_count[well_count < 4].index
+            dframe_grouped_two = dframe_grouped_two[
+                ~dframe_grouped_two["Metadata_Well"].isin(well_to_drop)
+            ].reset_index(drop=True)
+
+            # group by well
+            sub_sub_groups = dframe_grouped_two.groupby(group_key_three).groups
+            sampled_pairs = list(combinations(list(sub_sub_groups.keys()), r=2))
+
+            for idx1, idx2 in sampled_pairs:
+                df_group_one = dframe_grouped_two.loc[sub_sub_groups[idx1]].reset_index(
+                    drop=True
+                )
+                df_group_one["Label"] = 1
+                df_group_two = dframe_grouped_two.loc[sub_sub_groups[idx2]].reset_index(
+                    drop=True
+                )
+                df_group_two["Label"] = 0
+                df_sampled_ = pd.concat([df_group_one, df_group_two], ignore_index=True)
+
+                plate_list = get_common_plates(df_group_one, df_group_two)
+
+                ## Apply GFP filtering for control well pairs
+                log_file.write(f"{key}, {idx1}-{idx2}, Orig GFP independent t-test:")
+                df_sampled_well_agg = pl.DataFrame(
+                    df_sampled_
+                ).group_by(
+                    ["Metadata_Plate", "Metadata_Well", "Metadata_gene_allele", "Metadata_well_position"]
+                ).agg(
+                    pl.col(GFP_INTENSITY_COLUMN).median().alias(GFP_INTENSITY_COLUMN)
+                ).unique()
+                log_file.write(str(ind_ttest(
+                    df_sampled_well_agg.to_pandas(),
+                    key, key, GFP_INTENSITY_COLUMN  # Same allele for controls
+                )))
+
+                ## Get the optimal gfp range for paired control wells on each plate
+                df_sampled_filtered = pd.DataFrame()
+                for plate in plate_list:
+                    df_plate = df_sampled_[df_sampled_["Metadata_Plate"] == plate]
+                    group_one_gfp = df_plate[
+                        (df_plate["Label"] == 1) & (df_plate["Metadata_well_position"] == idx1)
+                    ][GFP_INTENSITY_COLUMN].to_numpy()
+                    group_two_gfp = df_plate[
+                        (df_plate["Label"] == 0) & (df_plate["Metadata_well_position"] == idx2)
+                    ][GFP_INTENSITY_COLUMN].to_numpy()
+
+                    ## Try quantile ranges from 25-75% to 10-90%
+                    quantile_pairs = [(0.25, 0.75), (0.2, 0.8), (0.15, 0.85), (0.1, 0.9)]
+                    for quantile_pair in quantile_pairs:
+                        gfp_low, gfp_high, ref_count, var_count, quantile_info = find_optimal_gfp_range_fast(
+                            group_one_gfp, group_two_gfp, quantile_pair=quantile_pair, min_cells_per_well=min_cells_per_well
+                        )
+                        if gfp_low is not None:
+                            # Filter cells within the optimal GFP range
+                            df_plate_filtered = df_plate[
+                                (df_plate[GFP_INTENSITY_COLUMN] >= gfp_low) &
+                                (df_plate[GFP_INTENSITY_COLUMN] <= gfp_high)
+                            ].reset_index(drop=True)
+                            df_plate_filtered_one = df_plate_filtered[df_plate_filtered["Label"] == 1]
+                            df_plate_filtered_two = df_plate_filtered[df_plate_filtered["Label"] == 0]
+
+                            ## Subsample the larger group to maintain a ratio <= 3
+                            if max(df_plate_filtered_two.shape[0], df_plate_filtered_one.shape[0]) / min(df_plate_filtered_two.shape[0], df_plate_filtered_one.shape[0]) > 3:
+                                if df_plate_filtered_two.shape[0] > df_plate_filtered_one.shape[0]:
+                                    df_plate_filtered_two = df_plate_filtered_two.sample(
+                                        n = df_plate_filtered_one.shape[0] * 3 - 1,
+                                        random_state=42
+                                    )
+                                else:
+                                    df_plate_filtered_one = df_plate_filtered_one.sample(
+                                        n = df_plate_filtered_two.shape[0] * 3 - 1,
+                                        random_state=42
+                                    )
+                            ## Merge back the filtered dataframes
+                            df_plate_filtered = pd.concat([
+                                df_plate_filtered_one, df_plate_filtered_two
+                            ], ignore_index=True)
+                            df_plate_filtered["Metadata_control_gfp_adj_classify"] = f"{key}_{idx1}-{idx2}_q{quantile_pair[0]}-{quantile_pair[1]}_plate"
+
+                            # Update df_sampled with filtered plate data
+                            df_sampled_filtered = pd.concat([
+                                df_sampled_filtered,
+                                df_plate_filtered
+                            ], ignore_index=True)
+                            log_file.write(f"{key}, {idx1}-{idx2}, {plate}, GFP range: {gfp_low:.2f}-{gfp_high:.2f}, Well1 # cells: {ref_count}, Well2 # cells: {var_count}, Quantile: {quantile_info}, Status: SUCCESS\n")
+                            break
+
+                        if gfp_low is None and quantile_pair==(0.1, 0.9):
+                            log_file.write(f"{key}, {idx1}-{idx2}, {plate}, GFP range: None-None, Well1 # cells: None, Well2 # cells: None, Quantile: FAILED, Status: NO_SUITABLE_RANGE\n")
+
+                if df_sampled_filtered.shape[0] == 0:
+                    log_file.write(f"{key}, {idx1}-{idx2}, Failed to correct for GFP on ANY PLATE and WELL pair. Skipping...\n")
+                    continue
+
+                log_file.write(f"{key}, {idx1}-{idx2}, Corrected GFP independent t-test:")
+                df_sampled_filterd_well_agg = pl.DataFrame(
+                    df_sampled_filtered
+                ).group_by(
+                    ["Metadata_Plate", "Metadata_Well", "Metadata_gene_allele", "Metadata_well_position"]
+                ).agg(
+                    pl.col(GFP_INTENSITY_COLUMN).median().alias(GFP_INTENSITY_COLUMN)
+                ).unique()
+                log_file.write(str(ind_ttest(
+                    df_sampled_filterd_well_agg.to_pandas(),
+                    key, key, GFP_INTENSITY_COLUMN
+                )))
+
+                ## Store the filtered cell list per this well pair across plates
+                filtered_cell_list.append(df_sampled_filtered)
+
+                ## Drop the GFP column during inference
+                df_sampled_filtered = df_sampled_filtered.drop(GFP_INTENSITY_COLUMN, axis=1)
+
+                ## Define the func. for thread_map the plate on the same df_sampled
+                def classify_by_plate_helper(plate):
+                    df_train, df_test = stratify_by_plate(df_sampled_filtered, plate)
+                    feat_importances, classifier_info, predictions = classifier(
+                        df_train, df_test, log_file
+                    )
+                    return {plate: [feat_importances, classifier_info, predictions]}
+
+                try:
+                    result = thread_map(classify_by_plate_helper, plate_list)
+                    pred_list = []
+                    for res in result:
+                        if list(res.values())[-1] is not None:
+                            feat_list.append(list(res.values())[0][0])
+                            group_list.append(key)
+                            pair_list.append(f"{idx1}_{idx2}")
+                            info_list.append(list(res.values())[0][1])
+                            pred_list.append(list(res.values())[0][2])
+                        else:
+                            log_file.write(f"Skipped classification result for {key}_{key_two}\n")
+                            print(f"Skipping classification result for {key}_{key_two}...")
+                            feat_list.append([None] * len(feat_cols))
+                            group_list.append(key)
+                            pair_list.append(f"{idx1}_{idx2}")
+                            info_list.append([None] * 10)
+
+                    cell_preds = pd.concat(pred_list, axis=0)
+                    cell_preds["Metadata_Feature_Type"] = feat_type
+                    cell_preds["Metadata_Control"] = True
+                    table = pa.Table.from_pandas(cell_preds, preserve_index=False)
+                    pq_writer.write_table(table)
+                except Exception as e:
+                    print(e)
+                    log_file.write(f"{key}, {key_two} error: {e}, wells per ctrl: {sub_sub_groups}\n")
+
+    # Store feature importance
+    df_feat_one = pd.DataFrame({"Group1": group_list, "Group2": pair_list})
+    df_feat_two = pd.DataFrame(feat_list)
+    df_feat = pd.concat([df_feat_one, df_feat_two], axis=1)
+    df_feat["Metadata_Feature_Type"] = feat_type
+    df_feat["Metadata_Control"] = True
+
+    # process classifier info
+    df_result = pd.concat(info_list, ignore_index=True)
+    df_result["Metadata_Control"] = True
+    df_result["Metadata_Feature_Type"] = feat_type
+
+    # Combine filtered cells
+    df_filtered_cells = pd.concat(filtered_cell_list, ignore_index=True) if filtered_cell_list else pd.DataFrame()
+
+    log_file.write(f"Finished running XGBboost classifiers w/ {feat_type} features on control alleles with GFP filtering.\n")
+    log_file.write(f"===========================================================================\n\n")
+    return df_feat, df_result, df_filtered_cells
+
+
+def stratify_by_well_pair_ctrl_gfp_filtered(
+    dframe_grouped_two: pd.DataFrame,
+    well_pair_trn: tuple,
+    key: str,
+    min_cells_per_well: int,
+    log_file
+):
+    """
+    Stratify control dataframe by well pairs with GFP intensity filtering (multi-rep layout).
+    One pair for training and one pair for testing, with matched GFP intensities.
+
+    Parameters:
+    -----------
+    dframe_grouped_two : pd.DataFrame
+        Control allele dataframe grouped by platemap
+    well_pair_trn : tuple
+        Tuple of (well1, well2) for training
+    key : str
+        Allele name for logging
+    min_cells_per_well : int
+        Minimum cells required per well after filtering
+    log_file : file object
+        Log file for writing status messages
+
+    Returns:
+    --------
+    df_train : pd.DataFrame
+        Training dataframe with GFP-matched cells (GFP column dropped)
+    df_test : pd.DataFrame
+        Testing dataframe with GFP-matched cells (GFP column dropped)
+    df_filtered_cells : pd.DataFrame
+        All GFP-matched cells (with GFP column retained for tracking)
+    """
+    sub_sub_groups = dframe_grouped_two.groupby("Metadata_well_position").groups
+    assert len(sub_sub_groups.keys()) == 4, f"Number of wells per plate is not 4: {sub_sub_groups.keys()}"
+
+    ## Get well pairs
+    well_pair_test = tuple(key_well for key_well in sub_sub_groups.keys() if key_well not in well_pair_trn)
+
+    ## Combine all 4 wells to apply GFP filtering
+    df_all_wells = dframe_grouped_two.copy()
+
+    ## Apply GFP filtering for each well pair (training and testing)
+    df_filtered_wells = pd.DataFrame()
+
+    # Filter training well pair
+    log_file.write(f"{key}, Training wells {well_pair_trn}, Orig GFP independent t-test:")
+    df_trn_well_agg = pl.DataFrame(
+        df_all_wells[df_all_wells["Metadata_well_position"].isin(well_pair_trn)]
+    ).group_by(
+        ["Metadata_Plate", "Metadata_Well", "Metadata_gene_allele", "Metadata_well_position"]
+    ).agg(
+        pl.col(GFP_INTENSITY_COLUMN).median().alias(GFP_INTENSITY_COLUMN)
+    ).unique()
+    log_file.write(str(ind_ttest(
+        df_trn_well_agg.to_pandas(),
+        key, key, GFP_INTENSITY_COLUMN
+    )))
+
+    well_one_gfp = df_all_wells[df_all_wells["Metadata_well_position"] == well_pair_trn[0]][GFP_INTENSITY_COLUMN].to_numpy()
+    well_two_gfp = df_all_wells[df_all_wells["Metadata_well_position"] == well_pair_trn[1]][GFP_INTENSITY_COLUMN].to_numpy()
+
+    quantile_pairs = [(0.25, 0.75), (0.2, 0.8), (0.15, 0.85), (0.1, 0.9)]
+    trn_filtered = False
+    for quantile_pair in quantile_pairs:
+        gfp_low, gfp_high, ref_count, var_count, quantile_info = find_optimal_gfp_range_fast(
+            well_one_gfp, well_two_gfp, quantile_pair=quantile_pair, min_cells_per_well=min_cells_per_well
+        )
+        if gfp_low is not None:
+            df_trn_filtered = df_all_wells[
+                (df_all_wells["Metadata_well_position"].isin(well_pair_trn)) &
+                (df_all_wells[GFP_INTENSITY_COLUMN] >= gfp_low) &
+                (df_all_wells[GFP_INTENSITY_COLUMN] <= gfp_high)
+            ].reset_index(drop=True)
+
+            ## Subsample to maintain ratio <= 3
+            df_trn_filt_one = df_trn_filtered[df_trn_filtered["Metadata_well_position"] == well_pair_trn[0]]
+            df_trn_filt_two = df_trn_filtered[df_trn_filtered["Metadata_well_position"] == well_pair_trn[1]]
+            if max(df_trn_filt_two.shape[0], df_trn_filt_one.shape[0]) / min(df_trn_filt_two.shape[0], df_trn_filt_one.shape[0]) > 3:
+                if df_trn_filt_two.shape[0] > df_trn_filt_one.shape[0]:
+                    df_trn_filt_two = df_trn_filt_two.sample(n=df_trn_filt_one.shape[0] * 3 - 1, random_state=42)
+                else:
+                    df_trn_filt_one = df_trn_filt_one.sample(n=df_trn_filt_two.shape[0] * 3 - 1, random_state=42)
+            df_trn_filtered = pd.concat([df_trn_filt_one, df_trn_filt_two], ignore_index=True)
+            df_trn_filtered["Metadata_control_gfp_adj_classify"] = f"{key}_{well_pair_trn[0]}-{well_pair_trn[1]}_q{quantile_pair[0]}-{quantile_pair[1]}_trn"
+            df_filtered_wells = pd.concat([df_filtered_wells, df_trn_filtered], ignore_index=True)
+            log_file.write(f"{key}, Training wells {well_pair_trn}, GFP range: {gfp_low:.2f}-{gfp_high:.2f}, Well1 # cells: {ref_count}, Well2 # cells: {var_count}, Quantile: {quantile_info}, Status: SUCCESS\n")
+            trn_filtered = True
+            break
+        if gfp_low is None and quantile_pair==(0.1, 0.9):
+            log_file.write(f"{key}, Training wells {well_pair_trn}, GFP range: None-None, Status: NO_SUITABLE_RANGE\n")
+
+    # Filter testing well pair
+    log_file.write(f"{key}, Testing wells {well_pair_test}, Orig GFP independent t-test:")
+    df_test_well_agg = pl.DataFrame(
+        df_all_wells[df_all_wells["Metadata_well_position"].isin(well_pair_test)]
+    ).group_by(
+        ["Metadata_Plate", "Metadata_Well", "Metadata_gene_allele", "Metadata_well_position"]
+    ).agg(
+        pl.col(GFP_INTENSITY_COLUMN).median().alias(GFP_INTENSITY_COLUMN)
+    ).unique()
+    log_file.write(str(ind_ttest(
+        df_test_well_agg.to_pandas(),
+        key, key, GFP_INTENSITY_COLUMN
+    )))
+
+    well_three_gfp = df_all_wells[df_all_wells["Metadata_well_position"] == well_pair_test[0]][GFP_INTENSITY_COLUMN].to_numpy()
+    well_four_gfp = df_all_wells[df_all_wells["Metadata_well_position"] == well_pair_test[1]][GFP_INTENSITY_COLUMN].to_numpy()
+
+    test_filtered = False
+    for quantile_pair in quantile_pairs:
+        gfp_low, gfp_high, ref_count, var_count, quantile_info = find_optimal_gfp_range_fast(
+            well_three_gfp, well_four_gfp, quantile_pair=quantile_pair, min_cells_per_well=min_cells_per_well
+        )
+        if gfp_low is not None:
+            df_test_filtered = df_all_wells[
+                (df_all_wells["Metadata_well_position"].isin(well_pair_test)) &
+                (df_all_wells[GFP_INTENSITY_COLUMN] >= gfp_low) &
+                (df_all_wells[GFP_INTENSITY_COLUMN] <= gfp_high)
+            ].reset_index(drop=True)
+
+            ## Subsample to maintain ratio <= 3
+            df_test_filt_one = df_test_filtered[df_test_filtered["Metadata_well_position"] == well_pair_test[0]]
+            df_test_filt_two = df_test_filtered[df_test_filtered["Metadata_well_position"] == well_pair_test[1]]
+            if max(df_test_filt_two.shape[0], df_test_filt_one.shape[0]) / min(df_test_filt_two.shape[0], df_test_filt_one.shape[0]) > 3:
+                if df_test_filt_two.shape[0] > df_test_filt_one.shape[0]:
+                    df_test_filt_two = df_test_filt_two.sample(n=df_test_filt_one.shape[0] * 3 - 1, random_state=42)
+                else:
+                    df_test_filt_one = df_test_filt_one.sample(n=df_test_filt_two.shape[0] * 3 - 1, random_state=42)
+            df_test_filtered = pd.concat([df_test_filt_one, df_test_filt_two], ignore_index=True)
+            df_test_filtered["Metadata_control_gfp_adj_classify"] = f"{key}_{well_pair_test[0]}-{well_pair_test[1]}_q{quantile_pair[0]}-{quantile_pair[1]}_test"
+            df_filtered_wells = pd.concat([df_filtered_wells, df_test_filtered], ignore_index=True)
+            log_file.write(f"{key}, Testing wells {well_pair_test}, GFP range: {gfp_low:.2f}-{gfp_high:.2f}, Well1 # cells: {ref_count}, Well2 # cells: {var_count}, Quantile: {quantile_info}, Status: SUCCESS\n")
+            test_filtered = True
+            break
+        if gfp_low is None and quantile_pair==(0.1, 0.9):
+            log_file.write(f"{key}, Testing wells {well_pair_test}, GFP range: None-None, Status: NO_SUITABLE_RANGE\n")
+
+    if not trn_filtered or not test_filtered:
+        log_file.write(f"{key}, Failed to filter GFP for training or testing wells. Returning empty dataframes.\n")
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+
+    ## Assign labels and create train/test splits
+    df_trn_filtered["Label"] = df_trn_filtered["Metadata_well_position"].apply(lambda x: 1 if x == well_pair_trn[0] else 0)
+    df_test_filtered["Label"] = df_test_filtered["Metadata_well_position"].apply(lambda x: 1 if x == well_pair_test[0] else 0)
+
+    ## Drop GFP column for classification
+    df_train = df_trn_filtered.drop(GFP_INTENSITY_COLUMN, axis=1).reset_index(drop=True)
+    df_test = df_test_filtered.drop(GFP_INTENSITY_COLUMN, axis=1).reset_index(drop=True)
+
+    return df_train, df_test, df_filtered_wells
+
+
+def control_group_runner_fewer_rep_gfp_filtered(
+    ctrl_dframe: pd.DataFrame,
+    pq_writer,
+    err_logger,
+    feat_type="GFP",
+    min_cells_per_well=20,
+    group_key_one="Metadata_gene_allele",
+    group_key_two="Metadata_plate_map_name",
+    group_key_three="Metadata_well_position",
+    threshold_key="Metadata_well_position",
+    well_count_min=None
+):
+    """
+    Run control group classification with GFP filtering for multi-rep design.
+    Uses well-pair-based train/test split with GFP intensity matching.
+
+    Parameters:
+    -----------
+    ctrl_dframe : pd.DataFrame
+        Control alleles dataframe
+    pq_writer : ParquetWriter
+        Writer for prediction outputs
+    err_logger : file object
+        Error log file
+    feat_type : str
+        Feature type (should be "GFP" for GFP filtering)
+    min_cells_per_well : int
+        Minimum cells required per well after filtering
+    group_key_one : str
+        Primary grouping key (allele)
+    group_key_two : str
+        Secondary grouping key (platemap)
+    group_key_three : str
+        Tertiary grouping key (well position)
+    threshold_key : str
+        Key for checking replicates
+    well_count_min : int or None
+        Minimum well count requirement
+
+    Returns:
+    --------
+    df_feat : pd.DataFrame
+        Feature importance dataframe
+    df_result : pd.DataFrame
+        Classifier info dataframe
+    df_filtered_cells : pd.DataFrame
+        GFP-matched cells dataframe
+    """
+    from itertools import combinations
+
+    ctrl_dframe = get_classifier_features(ctrl_dframe, feat_type)
+    feat_cols = find_feat_cols(ctrl_dframe)
+    feat_cols = [i for i in feat_cols if i != "Label"]
+
+    if len(feat_cols) == 0:
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+
+    group_list = []
+    pair_list = []
+    feat_list = []
+    info_list = []
+    filtered_cell_list = []
+
+    err_logger.write(f"Logging errors when running control experiments w/ {feat_type} features with GFP filtering:\n")
+    ## first we group the cells from the same Metadata_gene_allele
+    groups = ctrl_dframe.groupby(group_key_one).groups
+    for key in tqdm(groups.keys()):
+        ## groupby alleles
+        dframe_grouped = ctrl_dframe.loc[groups[key]].reset_index(drop=True)
+        # Skip controls with no replicates
+        if dframe_grouped[threshold_key].unique().size < 2:
+            continue
+        ## group by platemap
+        subgroups = dframe_grouped.groupby(group_key_two).groups
+        for key_two in subgroups.keys():
+            ## for each platemap
+            dframe_grouped_two = dframe_grouped.loc[subgroups[key_two]].reset_index(
+                drop=True
+            )
+            ## If a well is not present on all four plates, drop well
+            if well_count_min is not None:
+                well_count = dframe_grouped_two.groupby(["Metadata_Well"])[
+                    "Metadata_Plate"
+                ].nunique()
+                well_to_drop = well_count[well_count < well_count_min].index
+                dframe_grouped_two = dframe_grouped_two[
+                    ~dframe_grouped_two["Metadata_Well"].isin(well_to_drop)
+                ].reset_index(drop=True)
+
+            ## group by well
+            sub_sub_groups = dframe_grouped_two.groupby(group_key_three).groups
+            sampled_pairs = list(combinations(list(sub_sub_groups.keys()), r=2))
+
+            ## Apply GFP filtering for each well pair
+            try:
+                def classify_by_well_pair_helper(df_sampled: pd.DataFrame, well_pair: tuple, log_file=err_logger):
+                    """Helper func to run classifiers with GFP filtering in parallel"""
+                    df_train, df_test, df_filtered = stratify_by_well_pair_ctrl_gfp_filtered(
+                        df_sampled, well_pair, key, min_cells_per_well, log_file
+                    )
+                    if df_train.shape[0] == 0 or df_test.shape[0] == 0:
+                        return {f"trn_{well_pair[0]}_{well_pair[1]}": [None, None, None, None]}
+                    feat_importances, classifier_info, predictions = classifier(
+                        df_train, df_test, log_file
+                    )
+                    return {f"trn_{well_pair[0]}_{well_pair[1]}": [df_filtered, feat_importances, classifier_info, predictions]}
+
+                ## Bind df_sampled to the helper function
+                classify_by_well_pair_bound = partial(classify_by_well_pair_helper, dframe_grouped_two)
+                result = thread_map(classify_by_well_pair_bound, sampled_pairs)
+                pred_list = []
+                for res in result:
+                    if list(res.values())[0][0] is not None:
+                        filtered_cell_list.append(list(res.values())[0][0])
+                        feat_list.append(list(res.values())[0][1])
+                        group_list.append(key)
+                        pair_list.append(list(res.keys())[0])
+                        info_list.append(list(res.values())[0][2])
+                        pred_list.append(list(res.values())[0][3])
+                    else:
+                        err_logger.write(f"Skipped classification result for {key}_{key_two}\n")
+                        print(f"Skipping classification result for {key}_{key_two}...")
+                        feat_list.append(pd.Series([None] * len(feat_cols), index=feat_cols))
+                        group_list.append(key)
+                        pair_list.append(list(res.keys())[0])
+                        # Create empty DataFrame with proper column structure
+                        info_list.append(pd.DataFrame({
+                            "Classifier_ID": [None],
+                            "Plate": [None],
+                            "trainsize_0": [None],
+                            "testsize_0": [None],
+                            "well_0": [None],
+                            "allele_0": [None],
+                            "trainsize_1": [None],
+                            "testsize_1": [None],
+                            "well_1": [None],
+                            "allele_1": [None]
+                        }))
+
+                cell_preds = pd.concat(pred_list, axis=0)
+                cell_preds["Metadata_Feature_Type"] = feat_type
+                cell_preds["Metadata_Control"] = True
+                table = pa.Table.from_pandas(cell_preds, preserve_index=False)
+                pq_writer.write_table(table)
+            except Exception as e:
+                print(e)
+                err_logger.write(f"{key}, {key_two} error: {e}, wells per ctrl: {sub_sub_groups}\n")
+
+    # Store feature importance
+    df_feat_one = pd.DataFrame({"Group1": group_list, "Group2": pair_list})
+    df_feat_two = pd.DataFrame(feat_list)
+    df_feat = pd.concat([df_feat_one, df_feat_two], axis=1)
+    df_feat["Metadata_Feature_Type"] = feat_type
+    df_feat["Metadata_Control"] = True
+
+    # process classifier info
+    df_result = pd.concat(info_list, ignore_index=True)
+    df_result["Metadata_Control"] = True
+    df_result["Metadata_Feature_Type"] = feat_type
+
+    # Combine filtered cells
+    df_filtered_cells = pd.concat(filtered_cell_list, ignore_index=True) if filtered_cell_list else pd.DataFrame()
+
+    err_logger.write(f"Logging errors when running control experiments w/ {feat_type} features with GFP filtering finished.\n")
+    err_logger.write(f"==============================================================================\n\n")
+    return df_feat, df_result, df_filtered_cells

@@ -66,6 +66,8 @@ from .classify_multi_rep_per_plate import (
 from .classify_gfp_filter_func import (
     experimental_runner_filter_gfp,
     experimental_runner_plate_rep_gfp_filtered,
+    control_group_runner_gfp_filtered,
+    control_group_runner_fewer_rep_gfp_filtered,
     GFP_INTENSITY_COLUMN
 )
 
@@ -145,7 +147,11 @@ def run_classify_workflow(
     filtered_cell_path: str,
     cc_threshold: int,
     plate_layout: str,
-    use_gpu: Union[str, None] = None ## "0,1"
+    use_gpu: Union[str, None] = None, ## "0,1"
+    feat_output_path_control_gfp: Union[str, None] = None,
+    info_output_path_control_gfp: Union[str, None] = None,
+    preds_output_path_control_gfp: Union[str, None] = None,
+    filtered_cell_path_control: Union[str, None] = None
 ):
     """
     Run workflow for single-cell classification
@@ -200,6 +206,11 @@ def run_classify_workflow(
     ])
     writer = pq.ParquetWriter(preds_output_path, schema, compression="gzip")
     writer_gfp = pq.ParquetWriter(preds_output_path_gfp, schema, compression="gzip")
+
+    # Create control GFP writer if output paths are provided
+    writer_control_gfp = None
+    if preds_output_path_control_gfp is not None:
+        writer_control_gfp = pq.ParquetWriter(preds_output_path_control_gfp, schema, compression="gzip")
 
     # Add CellID column
     dframe_featsel = (
@@ -257,6 +268,7 @@ def run_classify_workflow(
     # Store the classifier feat_importance and classification_res
     feat_import_dfs, class_res_dfs = [], []
     feat_import_gfp_adj_dfs, class_res_gfp_adj_dfs, filtered_cells_gfp_adj_dfs = [], [], []
+    feat_import_control_gfp_dfs, class_res_control_gfp_dfs, filtered_cells_control_gfp_dfs = [], [], []
     
     # Split data into experimental df with var and ref alleles
     df_exp = dframe[~dframe["Metadata_control"].astype("bool")].reset_index(drop=True)
@@ -290,8 +302,9 @@ def run_classify_workflow(
                 print(feat)
                 # GFP corrected version
                 if feat == "GFP":
+                    # Run experimental GFP filtering
                     df_feat_pro_exp_gfp_adj, df_result_pro_exp_gfp_adj, df_filtered_cells_gfp_adj = experimental_runner_filter_gfp(
-                        df_exp, pq_writer=writer_gfp, 
+                        df_exp, pq_writer=writer_gfp,
                         log_file=log_file, min_cells_per_well=cc_threshold
                     )
                     # Store to another set of feat_df, res_df and filtered_cells parquet
@@ -299,6 +312,17 @@ def run_classify_workflow(
                         feat_import_gfp_adj_dfs += [df_feat_pro_exp_gfp_adj]
                         class_res_gfp_adj_dfs += [df_result_pro_exp_gfp_adj]
                         filtered_cells_gfp_adj_dfs += [df_filtered_cells_gfp_adj]
+
+                    # Run control GFP filtering if output paths are provided
+                    if writer_control_gfp is not None:
+                        df_feat_pro_con_gfp, df_result_pro_con_gfp, df_filtered_cells_con_gfp = control_group_runner_gfp_filtered(
+                            df_control, pq_writer=writer_control_gfp,
+                            log_file=log_file, min_cells_per_well=cc_threshold
+                        )
+                        if (df_feat_pro_con_gfp.shape[0] > 0):
+                            feat_import_control_gfp_dfs += [df_feat_pro_con_gfp]
+                            class_res_control_gfp_dfs += [df_result_pro_con_gfp]
+                            filtered_cells_control_gfp_dfs += [df_filtered_cells_con_gfp]
 
                     ## drop the gfp column during the inference if it was not selected during feature selection
                     if GFP_INTENSITY_COLUMN not in dframe_featsel.columns:
@@ -337,8 +361,9 @@ def run_classify_workflow(
                 print(feat)
                 # GFP corrected version
                 if feat == "GFP":
+                    # Run experimental GFP filtering
                     df_feat_pro_exp_gfp_adj, df_result_pro_exp_gfp_adj, df_filtered_cells_gfp_adj = experimental_runner_plate_rep_gfp_filtered(
-                        df_exp, pq_writer=writer_gfp, 
+                        df_exp, pq_writer=writer_gfp,
                         err_logger=log_file, min_cells_per_well=cc_threshold
                     )
                     # Store to another set of feat_df, res_df and filtered_cells parquet
@@ -346,6 +371,17 @@ def run_classify_workflow(
                         feat_import_gfp_adj_dfs += [df_feat_pro_exp_gfp_adj]
                         class_res_gfp_adj_dfs += [df_result_pro_exp_gfp_adj]
                         filtered_cells_gfp_adj_dfs += [df_filtered_cells_gfp_adj]
+
+                    # Run control GFP filtering if output paths are provided
+                    if writer_control_gfp is not None:
+                        df_feat_pro_con_gfp, df_result_pro_con_gfp, df_filtered_cells_con_gfp = control_group_runner_fewer_rep_gfp_filtered(
+                            df_control, pq_writer=writer_control_gfp,
+                            err_logger=log_file, min_cells_per_well=cc_threshold
+                        )
+                        if (df_feat_pro_con_gfp.shape[0] > 0):
+                            feat_import_control_gfp_dfs += [df_feat_pro_con_gfp]
+                            class_res_control_gfp_dfs += [df_result_pro_con_gfp]
+                            filtered_cells_control_gfp_dfs += [df_filtered_cells_con_gfp]
 
                     ## drop the gfp column during the inference
                     if GFP_INTENSITY_COLUMN not in dframe_featsel.columns:
@@ -368,6 +404,8 @@ def run_classify_workflow(
         # Close the parquet writers
         writer.close()
         writer_gfp.close()
+        if writer_control_gfp is not None:
+            writer_control_gfp.close()
 
     # Handle GFP-adjusted results if available
     if feat_import_gfp_adj_dfs:
@@ -375,11 +413,23 @@ def run_classify_workflow(
         df_result_gfp_adj = pd.concat(class_res_gfp_adj_dfs, ignore_index=True)
         df_filtered_cell = pd.concat(filtered_cells_gfp_adj_dfs, ignore_index=True)
         df_result_gfp_adj = df_result_gfp_adj.drop_duplicates()
-        
+
         # Write out GFP-adjusted results
         df_feat_gfp_adj.to_csv(feat_output_path_gfp, index=False)
         df_result_gfp_adj.to_csv(info_output_path_gfp, index=False)
         df_filtered_cell.to_parquet(filtered_cell_path, index=False)
+
+    # Handle control GFP-adjusted results if available
+    if feat_import_control_gfp_dfs and feat_output_path_control_gfp is not None:
+        df_feat_control_gfp = pd.concat(feat_import_control_gfp_dfs, ignore_index=True)
+        df_result_control_gfp = pd.concat(class_res_control_gfp_dfs, ignore_index=True)
+        df_filtered_cell_control = pd.concat(filtered_cells_control_gfp_dfs, ignore_index=True)
+        df_result_control_gfp = df_result_control_gfp.drop_duplicates()
+
+        # Write out control GFP-adjusted results
+        df_feat_control_gfp.to_csv(feat_output_path_control_gfp, index=False)
+        df_result_control_gfp.to_csv(info_output_path_control_gfp, index=False)
+        df_filtered_cell_control.to_parquet(filtered_cell_path_control, index=False)
     # else:
     #     # Create empty files if no GFP-adjusted results
     #     pd.DataFrame().to_csv(feat_output_path_gfp, index=False)

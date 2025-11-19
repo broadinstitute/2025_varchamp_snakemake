@@ -570,11 +570,11 @@ def main():
         cc_threshold=args.cc_threshold    
     )
 
-    calculate_class_metrics(
-        classifier_info=info_output_path,
-        predictions=preds_output_path,
-        metrics_file=os.path.join(args.output_dir, batch, "classification_metrics.csv"),
-    )
+    # calculate_class_metrics(
+    #     classifier_info=info_output_path,
+    #     predictions=preds_output_path,
+    #     metrics_file=os.path.join(args.output_dir, batch, "classification_metrics.csv"),
+    # )
 
 
 if __name__ == "__main__":
