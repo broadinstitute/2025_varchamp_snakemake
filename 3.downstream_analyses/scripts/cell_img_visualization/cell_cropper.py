@@ -10,6 +10,7 @@ Date: 2025
 """
 
 import os
+import warnings
 import numpy as np
 import polars as pl
 from skimage.io import imread
@@ -311,6 +312,7 @@ def extract_cell_crop(
     imgs_dir: str,
     method: str = 'bbox',
     target_size: Optional[int] = None,
+    canvas_size: Optional[int] = None,
     recenter: bool = True,
     crop_size: int = 128,
     pad_value: float = 0,
@@ -333,7 +335,11 @@ def extract_cell_crop(
     method : str
         'bbox' for bounding box extraction or 'fixed' for fixed-size extraction
     target_size : int, optional
-        If provided, resize crop to this size (for bbox method)
+        If provided, resize crop to this size (for bbox method).
+        Note: Resizing distorts the image - prefer canvas_size instead.
+    canvas_size : int, optional
+        If provided, center the crop in a fixed-size canvas without resizing.
+        This preserves original pixel values and is the preferred approach.
     recenter : bool
         For bbox method: recenter bbox on nuclei center
     crop_size : int
@@ -345,11 +351,17 @@ def extract_cell_crop(
 
     Returns:
     --------
-    np.ndarray : Cropped (and optionally resized) cell image
+    np.ndarray : Cropped (and optionally canvas-centered or resized) cell image
 
     Example:
     --------
-    # Bounding box method with recentering and resize
+    # Bounding box method with canvas centering (preferred - no distortion)
+    crop = extract_cell_crop(
+        cell_row, 'GFP', imgs_dir='/path/to/imgs',
+        method='bbox', recenter=True, canvas_size=128
+    )
+
+    # Bounding box method with resize (distorts image)
     crop = extract_cell_crop(
         cell_row, 'GFP', imgs_dir='/path/to/imgs',
         method='bbox', recenter=True, target_size=128
@@ -380,8 +392,24 @@ def extract_cell_crop(
     # Extract crop with padding if needed
     crop, _ = validate_and_pad_crop(img, x_min, y_min, x_max, y_max, pad_value)
 
-    # Resize if requested (typically for bbox method)
-    if target_size is not None and method == 'bbox':
+    # Option 1: Center in fixed canvas (preferred - no resize/distortion)
+    if canvas_size is not None:
+        h, w = crop.shape
+        if h > canvas_size or w > canvas_size:
+            # Warn and return raw crop if larger than canvas
+            warnings.warn(
+                f"Crop size ({h}x{w}) exceeds canvas_size ({canvas_size}). "
+                "Returning raw crop without centering."
+            )
+        else:
+            canvas = np.full((canvas_size, canvas_size), pad_value, dtype=crop.dtype)
+            y_offset = (canvas_size - h) // 2
+            x_offset = (canvas_size - w) // 2
+            canvas[y_offset:y_offset+h, x_offset:x_offset+w] = crop
+            crop = canvas
+
+    # Option 2: Resize (existing behavior, bbox method only - distorts image)
+    elif target_size is not None and method == 'bbox':
         if crop.shape[0] > 0 and crop.shape[1] > 0:
             crop = resize(crop, (target_size, target_size),
                          preserve_range=True, anti_aliasing=True)
@@ -396,6 +424,7 @@ def load_multichannel_cell_crops(
     imgs_dir: str,
     method: str = 'bbox',
     target_size: Optional[int] = None,
+    canvas_size: Optional[int] = None,
     recenter: bool = True,
     crop_size: int = 128,
     batch_col: str = "Metadata_Plate",
@@ -417,7 +446,9 @@ def load_multichannel_cell_crops(
     method : str
         'bbox' or 'fixed' extraction method
     target_size : int, optional
-        Target size for resizing (bbox method)
+        Target size for resizing (bbox method). Distorts image - prefer canvas_size.
+    canvas_size : int, optional
+        Canvas size for centering (preferred - no distortion)
     recenter : bool
         Whether to recenter on nuclei (bbox method)
     crop_size : int
@@ -432,12 +463,13 @@ def load_multichannel_cell_crops(
 
     Example:
     --------
+    # Preferred: use canvas_size (no distortion)
     cell_crops = load_multichannel_cell_crops(
         cell_row,
         channels=['DAPI', 'AGP', 'Mito', 'GFP'],
         imgs_dir='/path/to/imgs',
         method='bbox',
-        target_size=128,
+        canvas_size=128,
         recenter=True
     )
     """
@@ -449,6 +481,7 @@ def load_multichannel_cell_crops(
                 cell_row, channel, imgs_dir,
                 method=method,
                 target_size=target_size,
+                canvas_size=canvas_size,
                 recenter=recenter,
                 crop_size=crop_size,
                 batch_col=batch_col,
@@ -473,6 +506,7 @@ def batch_extract_cell_crops(
     imgs_dir: str,
     method: str = 'bbox',
     target_size: Optional[int] = None,
+    canvas_size: Optional[int] = None,
     recenter: bool = True,
     crop_size: int = 128,
     batch_col: str = "Metadata_Plate",
@@ -495,7 +529,9 @@ def batch_extract_cell_crops(
     method : str
         Extraction method ('bbox' or 'fixed')
     target_size : int, optional
-        Target size for bbox method
+        Target size for bbox method. Distorts image - prefer canvas_size.
+    canvas_size : int, optional
+        Canvas size for centering (preferred - no distortion)
     recenter : bool
         Whether to recenter on nuclei
     crop_size : int
@@ -509,12 +545,13 @@ def batch_extract_cell_crops(
 
     Example:
     --------
+    # Preferred: use canvas_size (no distortion)
     all_crops = batch_extract_cell_crops(
         selected_cells,
         channels=['DAPI', 'GFP', 'Mito', 'AGP'],
         imgs_dir='/path/to/imgs',
         method='bbox',
-        target_size=128
+        canvas_size=128
     )
 
     # Access a specific cell's GFP channel
@@ -530,6 +567,7 @@ def batch_extract_cell_crops(
                 row, channels, imgs_dir,
                 method=method,
                 target_size=target_size,
+                canvas_size=canvas_size,
                 recenter=recenter,
                 crop_size=crop_size,
                 batch_col=batch_col,

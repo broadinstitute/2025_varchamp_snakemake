@@ -23,7 +23,8 @@ from img_utils import channel_to_cmap, channel_to_rgb
 def normalize_channel(
     channel: np.ndarray,
     method: str = 'percentile',
-    percentile: float = 99.0,
+    percentile: float = 99.5,
+    percentile_low: float = 1.0,
     vmin: Optional[float] = None,
     vmax: Optional[float] = None,
     clip: bool = True,
@@ -31,17 +32,23 @@ def normalize_channel(
     """
     Normalize channel intensity with configurable contrast control.
 
+    This function is primarily used for multi-channel RGB visualization where
+    normalization is required to balance channel contributions. For single-channel
+    visualization, prefer using display-only contrast via imshow's vmin/vmax.
+
     Parameters:
     -----------
     channel : np.ndarray
         Input channel image
     method : str
         Normalization method:
-        - 'percentile': normalize by percentile value (default)
+        - 'percentile': normalize by percentile values (default)
         - 'minmax': normalize by actual min/max
         - 'manual': use provided vmin/vmax
     percentile : float
-        Percentile for clipping when method='percentile' (e.g., 99.9, 99, 95)
+        Upper percentile for contrast when method='percentile' (default: 99.5)
+    percentile_low : float
+        Lower percentile for dark background when method='percentile' (default: 1.0)
     vmin : float, optional
         Manual minimum value (overrides method)
     vmax : float, optional
@@ -55,8 +62,8 @@ def normalize_channel(
 
     Example:
     --------
-    # Using 99.9th percentile
-    norm = normalize_channel(img, method='percentile', percentile=99.9)
+    # Using percentiles (for RGB merge)
+    norm = normalize_channel(img, method='percentile', percentile=99.5, percentile_low=1.0)
 
     # Manual bounds
     norm = normalize_channel(img, method='manual', vmin=100, vmax=5000)
@@ -77,6 +84,8 @@ def normalize_channel(
     if vmin is None:
         if method == 'minmax':
             vmin = channel.min()
+        elif method == 'percentile':
+            vmin = np.percentile(channel, percentile_low)
         else:
             vmin = 0
 
@@ -211,8 +220,8 @@ def create_rgb_merge(
 def viz_cell_single_channel(
     crop: np.ndarray,
     channel: str,
-    contrast_percentile: float = 99.0,
-    contrast_method: str = 'percentile',
+    percentile_low: float = 1.0,
+    percentile_high: float = 99.5,
     vmin: Optional[float] = None,
     vmax: Optional[float] = None,
     ax: Optional[plt.Axes] = None,
@@ -221,7 +230,11 @@ def viz_cell_single_channel(
     colorbar: bool = False,
 ) -> plt.Axes:
     """
-    Visualize a single channel cell crop with adjustable contrast.
+    Visualize a single channel cell crop with display-only contrast adjustment.
+
+    This function displays raw pixel values using matplotlib's imshow vmin/vmax
+    parameters for contrast control. No data normalization is performed, which
+    preserves the original pixel values and avoids distortion.
 
     Parameters:
     -----------
@@ -229,12 +242,12 @@ def viz_cell_single_channel(
         Cell crop image (2D array)
     channel : str
         Channel name (e.g., 'GFP', 'DAPI', 'Mito', 'AGP')
-    contrast_percentile : float
-        Percentile for contrast adjustment
-    contrast_method : str
-        Normalization method ('percentile', 'minmax', 'manual')
+    percentile_low : float
+        Lower percentile for dark background (default: 1.0)
+    percentile_high : float
+        Upper percentile to avoid over-exposure (default: 99.5)
     vmin, vmax : float, optional
-        Manual intensity bounds (overrides percentile)
+        Manual intensity bounds (overrides percentiles)
     ax : matplotlib Axes, optional
         Axes to plot on (creates new if None)
     axis_off : bool
@@ -254,7 +267,8 @@ def viz_cell_single_channel(
     for i, channel in enumerate(['DAPI', 'AGP', 'Mito', 'GFP']):
         viz_cell_single_channel(
             crops[channel], channel,
-            contrast_percentile=99.5,
+            percentile_low=1.0,
+            percentile_high=99.5,
             ax=axes[i]
         )
     """
@@ -262,20 +276,15 @@ def viz_cell_single_channel(
     if ax is None:
         fig, ax = plt.subplots(figsize=(6, 6))
 
-    # Normalize channel
-    normalized = normalize_channel(
-        crop,
-        method=contrast_method,
-        percentile=contrast_percentile,
-        vmin=vmin,
-        vmax=vmax
-    )
+    # Calculate display bounds from raw data (no normalization - display only)
+    display_vmin = vmin if vmin is not None else np.percentile(crop, percentile_low)
+    display_vmax = vmax if vmax is not None else np.percentile(crop, percentile_high)
 
     # Get colormap for this channel
     cmap = channel_to_cmap(channel)
 
-    # Display
-    im = ax.imshow(normalized, cmap=cmap, vmin=0, vmax=1)
+    # Display RAW data with calculated bounds (no data modification)
+    im = ax.imshow(crop, cmap=cmap, vmin=display_vmin, vmax=display_vmax)
 
     if axis_off:
         ax.axis('off')
@@ -367,7 +376,7 @@ def viz_cell_grid(
     channel_crops: Dict[str, np.ndarray],
     channels: Optional[List[str]] = None,
     channel_mapping: str = 'morphology',
-    contrast_percentiles: Optional[Union[float, Dict[str, float]]] = None,
+    contrast_percentiles: Optional[Union[float, Dict[str, float]]] = 99.5,
     contrast_method: str = 'percentile',
     figsize: Tuple[int, int] = (12, 10),
     save_path: Optional[str] = None,
@@ -390,9 +399,10 @@ def viz_cell_grid(
     channel_mapping : str
         RGB mapping strategy for merged view
     contrast_percentiles : float or dict, optional
-        Contrast percentiles (per-channel or global)
+        Upper percentile for contrast (default: 99.5).
+        Used for single-channel display and RGB normalization.
     contrast_method : str
-        Normalization method
+        Normalization method for RGB merge only (single-channel uses display-only)
     figsize : tuple
         Figure size (width, height)
     save_path : str, optional
@@ -430,12 +440,17 @@ def viz_cell_grid(
     # Top row: Individual channels
     for i, channel in enumerate(channels):
         ax = fig.add_subplot(gs[0, i])
+        # Determine percentile_high for this channel
+        if isinstance(contrast_percentiles, (int, float)):
+            pct_high = contrast_percentiles
+        elif contrast_percentiles is not None:
+            pct_high = contrast_percentiles.get(channel, 99.5)
+        else:
+            pct_high = 99.5
         viz_cell_single_channel(
             channel_crops[channel],
             channel=channel,
-            contrast_percentile=contrast_percentiles if isinstance(contrast_percentiles, (int, float))
-                               else contrast_percentiles.get(channel, 99.0) if contrast_percentiles else 99.0,
-            contrast_method=contrast_method,
+            percentile_high=pct_high,
             ax=ax,
             axis_off=True,
             title=channel
@@ -476,7 +491,7 @@ def plot_cell_comparison(
     ref_crops: Dict[str, np.ndarray],
     channels: Optional[List[str]] = None,
     channel_mapping: str = 'morphology',
-    contrast_percentiles: Optional[Union[float, Dict[str, float]]] = None,
+    contrast_percentiles: Optional[Union[float, Dict[str, float]]] = 99.5,
     contrast_method: str = 'percentile',
     variant_label: str = 'Variant',
     ref_label: str = 'Reference',
@@ -500,11 +515,12 @@ def plot_cell_comparison(
     channels : list of str, optional
         Channels to display
     channel_mapping : str
-        RGB mapping strategy
+        RGB mapping strategy for multi-channel merge
     contrast_percentiles : float or dict, optional
-        Contrast percentiles
+        Upper percentile for contrast (default: 99.5).
+        Used for single-channel display and RGB normalization.
     contrast_method : str
-        Normalization method
+        Normalization method for RGB merge only (single-channel uses display-only)
     variant_label : str
         Label for variant cell
     ref_label : str
@@ -543,13 +559,19 @@ def plot_cell_comparison(
 
     # Individual channels (rows 0 to n_channels-1)
     for i, channel in enumerate(channels):
+        # Determine percentile_high for this channel
+        if isinstance(contrast_percentiles, (int, float)):
+            pct_high = contrast_percentiles
+        elif contrast_percentiles is not None:
+            pct_high = contrast_percentiles.get(channel, 99.5)
+        else:
+            pct_high = 99.5
+
         # Variant channel
         ax_var = fig.add_subplot(gs[i, 0])
         viz_cell_single_channel(
             variant_crops[channel], channel,
-            contrast_percentile=contrast_percentiles if isinstance(contrast_percentiles, (int, float))
-                               else contrast_percentiles.get(channel, 99.0) if contrast_percentiles else 99.0,
-            contrast_method=contrast_method,
+            percentile_high=pct_high,
             ax=ax_var,
             axis_off=True,
             title=f"{channel}" if i == 0 else None
@@ -562,9 +584,7 @@ def plot_cell_comparison(
         ax_ref = fig.add_subplot(gs[i, 1])
         viz_cell_single_channel(
             ref_crops[channel], channel,
-            contrast_percentile=contrast_percentiles if isinstance(contrast_percentiles, (int, float))
-                               else contrast_percentiles.get(channel, 99.0) if contrast_percentiles else 99.0,
-            contrast_method=contrast_method,
+            percentile_high=pct_high,
             ax=ax_ref,
             axis_off=True,
             title=f"{channel}" if i == 0 else None
