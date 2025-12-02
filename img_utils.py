@@ -131,7 +131,9 @@ batch_dict = {
     "B14A7A8P1": "2025_01_28_Batch_14",
     "B14A7A8P2": "2025_01_28_Batch_14",
     "B15A1A2P1": "2025_03_17_Batch_15",
+    "B15A1A2": "2025_03_17_Batch_15",  # Alternative key for Metadata_plate_map_name format
     "B16A1A2P1": "2025_03_17_Batch_16",
+    "B16A1A2": "2025_03_17_Batch_16",  # Alternative key for Metadata_plate_map_name format
     "B18A8A10R1": "2025_06_10_Batch_18",
     "B19A8A10R1": "2025_06_10_Batch_19"
 }
@@ -182,16 +184,28 @@ plate_dict = {
         "T4": '2025_06_04_B19A8A10R1_P2T4__2025-06-04T11_49_06-Measurement1'
     },
     
-    ## Batch 15
+    ## Batch 15 (Metadata_plate_map_name is "B15A1A2_P1")
     "B15A1A2P1_R1": {
         "T1": '2025-03-17_B15A1A2_P1T1__2025-03-17T08_34_13-Measurement_1',
         "T2": '2025-03-17_B15A1A2_P1T3__2025-03-17T11_08_17-Measurement_2',
         "T3": '2025-03-17_B15A1A2_P1T2__2025-03-17T09_39_24-Measurement_1',
         "T4": '2025-03-17_B15A1A2_P1T4__2025-03-17T12_28_48-Measurement_1'
     },
-    
-    ## Batch 16
+    "B15A1A2_P1": {  # Alias for Metadata_plate_map_name format
+        "T1": '2025-03-17_B15A1A2_P1T1__2025-03-17T08_34_13-Measurement_1',
+        "T2": '2025-03-17_B15A1A2_P1T3__2025-03-17T11_08_17-Measurement_2',
+        "T3": '2025-03-17_B15A1A2_P1T2__2025-03-17T09_39_24-Measurement_1',
+        "T4": '2025-03-17_B15A1A2_P1T4__2025-03-17T12_28_48-Measurement_1'
+    },
+
+    ## Batch 16 (Metadata_plate_map_name is "B16A1A2_P1")
     "B16A1A2P1_R2": {
+        "T1": '2025-03-18_B16A1A2_P1T2__2025-03-18T08_45_49-Measurement_1',
+        "T2": '2025-03-18_B16A1A2_P1T3__2025-03-18T10_08_59-Measurement_1',
+        "T3": '2025-03-17_B16A1A2_P1T1__2025-03-17T13_48_08-Measurement_1',
+        "T4": '2025-03-18_B16A1A2_P1T4__2025-03-18T11_18_31-Measurement_1'
+    },
+    "B16A1A2_P1": {  # Alias for Metadata_plate_map_name format
         "T1": '2025-03-18_B16A1A2_P1T2__2025-03-18T08_45_49-Measurement_1',
         "T2": '2025-03-18_B16A1A2_P1T3__2025-03-18T10_08_59-Measurement_1',
         "T3": '2025-03-17_B16A1A2_P1T1__2025-03-17T13_48_08-Measurement_1',
@@ -228,11 +242,13 @@ plate_dict = {
         "T3": '2025_01_28_B14A7A8P2_T3__2025_01_28T16_06_55_Measurement_1'
     },
 
-    ## Batch 11
+    ## Batch 11 (single timepoint - Metadata_plate_map_name is "B11A1R1_P1")
     "B11A1R1": "2024-12-09_B11A1R1__2024-12-09T08_49_55-Measurement_1",
+    "B11A1R1_P1": "2024-12-09_B11A1R1__2024-12-09T08_49_55-Measurement_1",  # Alias for Metadata_plate_map_name
 
-    ## Batch 12
-    "B12A1R2": "2024-12-09_B12A1R2__2024-12-09T10_34_39-Measurement_1", 
+    ## Batch 12 (single timepoint - Metadata_plate_map_name is "B12A1R2_P1")
+    "B12A1R2": "2024-12-09_B12A1R2__2024-12-09T10_34_39-Measurement_1",
+    "B12A1R2_P1": "2024-12-09_B12A1R2__2024-12-09T10_34_39-Measurement_1",  # Alias for Metadata_plate_map_name 
 
     ## Batch 7
     "B7A1R1_P1": {"T1": "2024_01_17_B7A1R1_P1T1__2024_01_17T08_35_58_Measurement_1",
