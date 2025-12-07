@@ -9,13 +9,22 @@ import seaborn as sns
 from skimage.io import imread
 from functools import reduce
 import sys
-sys.path.append("../..")
+
+# Get the directory where this script is located
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+# _PROJECT_ROOT points to 3.downstream_analyses/
+_PROJECT_ROOT = os.path.abspath(os.path.join(_SCRIPT_DIR, "..", ".."))
+# _REPO_ROOT points to 2025_varchamp_snakemake/ (where img_utils.py lives)
+_REPO_ROOT = os.path.abspath(os.path.join(_PROJECT_ROOT, ".."))
+
+# Add the repo root to path for img_utils import
+sys.path.insert(0, _REPO_ROOT)
 from img_utils import *
 
 
-BATCH_PROFILES = "../../2.snakemake_pipeline/outputs/batch_profiles/{}/profiles.parquet" 
-IMG_ANALYSIS_DIR = "../../1.image_preprocess_qc/inputs/cpg_imgs/{}/analysis"
-BATCH_PROFILES_GFP_FILTERED = "../../2.snakemake_pipeline/outputs/classification_results/{}/profiles_tcdropped_filtered_var_mad_outlier_featselect_filtcells/gfp_adj_filtered_cells_profiles.parquet" 
+BATCH_PROFILES = os.path.join(_REPO_ROOT, "2.snakemake_pipeline/outputs/batch_profiles/{}/profiles.parquet")
+IMG_ANALYSIS_DIR = os.path.join(_REPO_ROOT, "1.image_preprocess_qc/inputs/cpg_imgs/{}/analysis")
+BATCH_PROFILES_GFP_FILTERED = os.path.join(_REPO_ROOT, "2.snakemake_pipeline/outputs/classification_results/{}/profiles_tcdropped_filtered_var_mad_outlier_featselect_filtcells/gfp_adj_filtered_cells_profiles.parquet") 
 GFP_INTENSITY_COLUMN = "Cells_Intensity_IntegratedIntensity_GFP" ## Cells_Intensity_MeanIntensity_GFP is another option
 
 
@@ -157,11 +166,12 @@ GFP_INTENSITY_COLUMN = "Cells_Intensity_IntegratedIntensity_GFP" ## Cells_Intens
 #         batch_profiles[batch_id] = profiles
 
 # Pickle the metadata dictionary
-# with open("../../2.snakemake_pipeline/outputs/visualize_cells/batch_prof_dict.pkl", "wb") as f:
+_BATCH_PROF_DICT_PATH = os.path.join(_REPO_ROOT, "2.snakemake_pipeline/outputs/visualize_cells/batch_prof_dict.pkl")
+# with open(_BATCH_PROF_DICT_PATH, "wb") as f:
 #     pickle.dump(batch_profiles, f, pickle.HIGHEST_PROTOCOL)
 
 # To load the dictionary and DataFrames later
-with open("../../2.snakemake_pipeline/outputs/visualize_cells/batch_prof_dict.pkl", "rb") as f:
+with open(_BATCH_PROF_DICT_PATH, "rb") as f:
     batch_profiles = pickle.load(f)
 
 
