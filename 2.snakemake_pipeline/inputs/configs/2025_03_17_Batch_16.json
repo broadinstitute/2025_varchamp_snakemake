@@ -1,6 +1,6 @@
 {
-    "input_dir": "/home/shenrunx/igvf/varchamp/2025_varchamp_snakemake/2.snakemake_pipeline/inputs",
-    "output_dir": "/home/shenrunx/igvf/varchamp/2025_varchamp_snakemake/2.snakemake_pipeline/outputs",
+    "input_dir": "inputs",
+    "output_dir": "outputs",
     "Metadata_Batch": "2025_03_17_Batch_16",
     "pipeline": "profiles_tcdropped_filtered_var_mad_outlier_featselect_filtcells",
     "cell_count_col": "Metadata_Object_Count",

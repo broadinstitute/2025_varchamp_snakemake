@@ -1,9 +1,20 @@
-## Should ONLY be run when located 8.2_updated_snakemake_pipeline
-configfile: "/home/shenrunx/igvf/varchamp/2025_varchamp_snakemake/2.snakemake_pipeline/inputs/configs/2025_03_17_Batch_16.json"
+## Should ONLY be run when located in 2.snakemake_pipeline/
+from pathlib import Path
+import sys
 
-include: "/home/shenrunx/igvf/varchamp/2025_varchamp_snakemake/2.snakemake_pipeline/rules/common.smk"
-include: "/home/shenrunx/igvf/varchamp/2025_varchamp_snakemake/2.snakemake_pipeline/rules/preprocess.smk"
-include: "/home/shenrunx/igvf/varchamp/2025_varchamp_snakemake/2.snakemake_pipeline/rules/analysis.smk"
+# Get the directory containing this Snakefile
+SNAKEFILE_DIR = Path(workflow.snakefile).parent
+# Go up two levels to get to 2.snakemake_pipeline/
+PIPELINE_DIR = SNAKEFILE_DIR.parent.parent
+
+# Add pipeline directory to Python path so modules can be imported
+sys.path.insert(0, str(PIPELINE_DIR))
+
+configfile: str(PIPELINE_DIR / "inputs/configs/2025_03_17_Batch_16.json")
+
+include: str(PIPELINE_DIR / "rules/common.smk")
+include: str(PIPELINE_DIR / "rules/preprocess.smk")
+include: str(PIPELINE_DIR / "rules/analysis.smk")
 
 BATCH = config["Metadata_Batch"]
 PIPELINE = config["pipeline"]
