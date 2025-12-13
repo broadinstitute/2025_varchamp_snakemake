@@ -1,3 +1,61 @@
+#!/home/shenrunx/software/anaconda3/envs/varchamp/bin/python
+"""
+Calculate Plate Background and Conduct Imaging Well QC
+
+This script calculates 384-well plate background statistics and conducts QC
+for each imaging well by processing TIFF images from Cell Painting Gallery.
+
+OPTIMIZATION:
+-------------
+This script only processes plates that are specified in each batch's platemap files
+(barcode_platemap.csv), significantly reducing computation time by skipping plates
+that are not used in downstream analysis. The script matches plate directory names
+against the Assay_Plate_Barcode column in the platemap.
+
+USAGE:
+------
+This script can be run in two ways:
+
+1. Command Line (single or multiple batches):
+
+   # Single batch with logging to file and console
+   python 1_calc_plate_bg.py \
+       --batch_list "2025_05_23_Batch_17" \
+       --input_dir "path/to/cpg_imgs" \
+       --platemaps_dir "path/to/platemaps" \
+       --output_dir "path/to/output" \
+       --workers 64 \
+       2>&1 | tee calc_plate_bg_batch17.log
+
+   # Multiple batches (comma-separated, NO SPACES)
+   python 1_calc_plate_bg.py \
+       --batch_list "2025_05_23_Batch_17,2025_06_10_Batch_18" \
+       --input_dir "path/to/cpg_imgs" \
+       --platemaps_dir "path/to/platemaps" \
+       --output_dir "path/to/output" \
+       --workers 128 \
+       2>&1 | tee calc_plate_bg_batch17-18.log
+
+    python 1.image_preprocess_qc/scripts/1_calc_plate_bg.py \
+       --batch_list "2024_01_23_Batch_7,2024_02_06_Batch_8,2024_12_09_Batch_11,2024_12_09_Batch_12,2025_01_27_Batch_13,2025_01_28_Batch_14,2025_03_17_Batch_15,2025_03_17_Batch_16" \
+       --input_dir "1.image_preprocess_qc/inputs/cpg_imgs" \
+       --platemaps_dir "2.snakemake_pipeline/inputs/metadata/platemaps" \
+       --output_dir "1.image_preprocess_qc/outputs/plate_bg_summary" \
+       --workers 256 \
+       2>&1 | tee 1.image_preprocess_qc/outputs/calc_plate_bg_oneperc.log
+
+2. Marimo Notebook:
+   marimo edit 1_calc_plate_bg.py
+
+   (Batch list and other parameters are configured in the script)
+
+OUTPUTS:
+--------
+For each batch, creates:
+- plate_sum_stats.parquet: Per-plate, per-channel statistics
+- plate_well_sum_stats.parquet: Per-well, per-channel statistics
+"""
+
 import marimo
 
 __generated_with = "0.8.22"
@@ -55,25 +113,29 @@ def __(__file__):
         batch_list = "2024_01_23_Batch_7,2024_02_06_Batch_8,2025_03_17_Batch_15,2025_03_17_Batch_16"
         # batch_list = "2024_12_09_Batch_11,2024_12_09_Batch_12"
         TIFF_IMG_DIR = "../inputs/cpg_imgs"
+        PLATEMAPS_DIR = "../../2.snakemake_pipeline/inputs/metadata/platemaps"
         output_dir = "../outputs/sum_stats_parquet"
         workers = 128
     else:
         # Running from command line - parse arguments
         p = argparse.ArgumentParser(__doc__)
-        p.add_argument("--batch_list", help="batch to process")
-        p.add_argument("--input_dir", type=str)
-        p.add_argument("--output_dir", type=str)
+        p.add_argument("--batch_list", help="batch to process (comma-separated, no spaces)")
+        p.add_argument("--input_dir", type=str, help="Path to CPG images directory")
+        p.add_argument("--platemaps_dir", type=str, help="Path to platemaps directory")
+        p.add_argument("--output_dir", type=str, help="Path to output directory")
         p.add_argument("--workers", type=int, default=256, help="Number of parallel workers")
         args = p.parse_args()
 
         batch_list = args.batch_list
         TIFF_IMG_DIR = args.input_dir
+        PLATEMAPS_DIR = args.platemaps_dir
         output_dir = args.output_dir
         workers = args.workers
 
     batches = batch_list.split(",")
     return (
         PERCENTILE_ARRAY,
+        PLATEMAPS_DIR,
         TIFF_IMG_DIR,
         ThreadPoolExecutor,
         argparse,
@@ -97,6 +159,42 @@ def __(__file__):
         tqdm,
         workers,
     )
+
+
+@app.cell
+def __(mo):
+    mo.md(r"## Helper function to get valid plates from platemaps")
+    return
+
+
+@app.cell
+def __(os, pl):
+    def get_valid_plates_from_platemap(platemaps_dir, batch):
+        """
+        Read the barcode_platemap.csv for a batch and return the set of valid plate barcodes.
+
+        Args:
+            platemaps_dir: Path to the platemaps directory
+            batch: Batch name (e.g., "2025_03_17_Batch_15")
+
+        Returns:
+            Set of plate barcodes (e.g., {"2025-03-17_B15A1A2_P1T1", ...})
+        """
+        platemap_file = os.path.join(platemaps_dir, batch, "barcode_platemap.csv")
+
+        if not os.path.exists(platemap_file):
+            print(f"Warning: Platemap not found at {platemap_file}. Processing all plates in batch.")
+            return None
+
+        # Read the platemap
+        df = pl.read_csv(platemap_file)
+
+        # Extract unique plate barcodes from Assay_Plate_Barcode column
+        plate_barcodes = set(df["Assay_Plate_Barcode"].unique().to_list())
+
+        print(f"Found {len(plate_barcodes)} unique plates in platemap for {batch}")
+        return plate_barcodes
+    return (get_valid_plates_from_platemap,)
 
 
 @app.cell
@@ -154,8 +252,15 @@ def __(
           s    -- sum of pixel values (float64)
           ss   -- sum of squared pixel values (float64)
           hist -- histogram array shape (max_gray+1,)
+          None -- if file is corrupted/unreadable
         """
-        img = imread(path)
+        try:
+            img = imread(path)
+        except Exception as e:
+            print(f"⚠️  Warning: Skipping corrupted TIFF: {path}")
+            print(f"    Error: {e}")
+            return None
+
         arr = img.ravel()
         n = arr.size
 
@@ -199,7 +304,11 @@ def __(
         total_hist = np.zeros(max_gray + 1, dtype=np.int64)
 
         for path in tiff_imgs:
-            n, s, ss, hist = summarize_tiff_img(path)
+            result = summarize_tiff_img(path)
+            if result is None:
+                # Skip corrupted files
+                continue
+            n, s, ss, hist = result
             total_n     += n
             total_sum   += s
             total_sumsq += ss
@@ -269,11 +378,13 @@ def __(
 
 @app.cell
 def __(
+    PLATEMAPS_DIR,
     TIFF_IMG_DIR,
     ThreadPoolExecutor,
     as_completed,
     batches,
     channel_dict_rev,
+    get_valid_plates_from_platemap,
     glob,
     letter_dict_rev,
     os,
@@ -285,10 +396,28 @@ def __(
     workers,
 ):
     for batch in batches:
-        print(f"Summarize the per-channel plate-level summary statistics for {batch}:")
+        print(f"\n{'='*80}")
+        print(f"Processing batch: {batch}")
+        print(f"{'='*80}")
+
+        # Get valid plates from platemap
+        valid_plate_barcodes = get_valid_plates_from_platemap(PLATEMAPS_DIR, batch)
+
         plate_channel_imgs, plate_well_channel_imgs = [], []
 
-        plates = os.listdir(f"{TIFF_IMG_DIR}/{batch}/images")
+        # Get all plate directories
+        all_plates = os.listdir(f"{TIFF_IMG_DIR}/{batch}/images")
+
+        # Filter plates based on platemap
+        if valid_plate_barcodes is not None:
+            plates = [
+                plate for plate in all_plates
+                if any(plate.startswith(barcode) for barcode in valid_plate_barcodes)
+            ]
+            print(f"Filtered from {len(all_plates)} to {len(plates)} plates based on platemap")
+        else:
+            plates = all_plates
+            print(f"Processing all {len(plates)} plates (no platemap filter applied)")
         for plate in tqdm(plates):
             for channel in channel_dict_rev.keys():
                 ## map a tiff to its plate_well_channel
