@@ -19,44 +19,48 @@ conda activate varchamp
 # Navigate to pipeline directory
 cd "$(dirname "$0")/.."
 
-# Batch 11 - Multi-rep layout
-echo "Running Batch 11 (multi_rep)..."
-python classification/classify_gfp_filtered_control_cmd.py \
-    --input_path outputs/batch_profiles/2024_12_09_Batch_11/profiles_tcdropped_filtered_var_mad_outlier_featselect.parquet \
-    --input_path_orig outputs/batch_profiles/2024_12_09_Batch_11/profiles.parquet \
-    --output_base_dir outputs/classification_analyses/2024_12_09_Batch_11 \
-    --pipeline_name profiles_tcdropped_filtered_var_mad_outlier_featselect_filtcells \
-    --plate_layout multi_rep \
-    --cc_threshold 20
+# Define batches with single-rep layout
+SINGLE_REP_BATCHES=(
+    "2024_01_23_Batch_7"
+    "2024_02_06_Batch_8"
+    "2025_01_27_Batch_13"
+    "2025_01_28_Batch_14"
+    "2025_03_17_Batch_15"
+    "2025_03_17_Batch_16"
+)
 
-# Batch 12 - Multi-rep layout
-echo "Running Batch 12 (multi_rep)..."
-python classification/classify_gfp_filtered_control_cmd.py \
-    --input_path outputs/batch_profiles/2024_12_09_Batch_12/profiles_tcdropped_filtered_var_mad_outlier_featselect.parquet \
-    --input_path_orig outputs/batch_profiles/2024_12_09_Batch_12/profiles.parquet \
-    --output_base_dir outputs/classification_analyses/2024_12_09_Batch_12 \
-    --pipeline_name profiles_tcdropped_filtered_var_mad_outlier_featselect_filtcells \
-    --plate_layout multi_rep \
-    --cc_threshold 20
+# Define batches with multi-rep layout
+MULTI_REP_BATCHES=(
+    "2024_12_09_Batch_11"
+    "2024_12_09_Batch_12"
+)
 
-# Batch 18 - Single-rep layout
-echo "Running Batch 18 (single_rep)..."
-python classification/classify_gfp_filtered_control_cmd.py \
-    --input_path outputs/batch_profiles/2025_06_10_Batch_18/profiles_tcdropped_filtered_var_mad_outlier_featselect.parquet \
-    --input_path_orig outputs/batch_profiles/2025_06_10_Batch_18/profiles.parquet \
-    --output_base_dir outputs/classification_analyses/2025_06_10_Batch_18 \
-    --pipeline_name profiles_tcdropped_filtered_var_mad_outlier_featselect_filtcells \
-    --plate_layout single_rep \
-    --cc_threshold 20
+# Run single-rep batches
+for batch in "${SINGLE_REP_BATCHES[@]}"; do
+    batch_num=$(echo "$batch" | grep -o "Batch_[0-9]*" | grep -o "[0-9]*")
+    echo "Running Batch $batch_num (single_rep): $batch"
+    python classification/classify_gfp_filtered_control_cmd.py \
+        --input_path outputs/batch_profiles/$batch/profiles_tcdropped_filtered_var_mad_outlier_featselect.parquet \
+        --input_path_orig outputs/batch_profiles/$batch/profiles.parquet \
+        --output_base_dir outputs/classification_analyses/$batch \
+        --pipeline_name profiles_tcdropped_filtered_var_mad_outlier_featselect_filtcells \
+        --plate_layout single_rep \
+        --cc_threshold 20
+    echo ""
+done
 
-# Batch 19 - Single-rep layout
-echo "Running Batch 19 (single_rep)..."
-python classification/classify_gfp_filtered_control_cmd.py \
-    --input_path outputs/batch_profiles/2025_06_10_Batch_19/profiles_tcdropped_filtered_var_mad_outlier_featselect.parquet \
-    --input_path_orig outputs/batch_profiles/2025_06_10_Batch_19/profiles.parquet \
-    --output_base_dir outputs/classification_analyses/2025_06_10_Batch_19 \
-    --pipeline_name profiles_tcdropped_filtered_var_mad_outlier_featselect_filtcells \
-    --plate_layout single_rep \
-    --cc_threshold 20
+# Run multi-rep batches
+for batch in "${MULTI_REP_BATCHES[@]}"; do
+    batch_num=$(echo "$batch" | grep -o "Batch_[0-9]*" | grep -o "[0-9]*")
+    echo "Running Batch $batch_num (multi_rep): $batch"
+    python classification/classify_gfp_filtered_control_cmd.py \
+        --input_path outputs/batch_profiles/$batch/profiles_tcdropped_filtered_var_mad_outlier_featselect.parquet \
+        --input_path_orig outputs/batch_profiles/$batch/profiles.parquet \
+        --output_base_dir outputs/classification_analyses/$batch \
+        --pipeline_name profiles_tcdropped_filtered_var_mad_outlier_featselect_filtcells \
+        --plate_layout multi_rep \
+        --cc_threshold 20
+    echo ""
+done
 
 echo "All control GFP-filtered classifications completed!"

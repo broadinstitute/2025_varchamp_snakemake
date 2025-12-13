@@ -95,23 +95,28 @@ def log_memory_usage(log_file, stage=""):
 
 def force_memory_cleanup(log_file):
     """Force garbage collection and attempt to free memory"""
-    log_file.write("Forcing memory cleanup...\n")
-    
+    if log_file is not None:
+        log_file.write("Forcing memory cleanup...\n")
+
     # Force garbage collection multiple times
     for i in range(3):
         collected = gc.collect()
-        log_file.write(f"  GC round {i+1}: collected {collected} objects\n")
-    
+        if log_file is not None:
+            log_file.write(f"  GC round {i+1}: collected {collected} objects\n")
+
     # Try to release unused memory back to OS (Linux only)
     try:
         import ctypes
         libc = ctypes.CDLL("libc.so.6")
         libc.malloc_trim(0)
-        log_file.write("  malloc_trim() called\n")
+        if log_file is not None:
+            log_file.write("  malloc_trim() called\n")
     except Exception as e:
-        log_file.write(f"  malloc_trim() failed: {e}\n")
-    
-    log_file.flush()
+        if log_file is not None:
+            log_file.write(f"  malloc_trim() failed: {e}\n")
+
+    if log_file is not None:
+        log_file.flush()
 
 
 def check_memory_limits(log_file, max_memory_gb=32):
