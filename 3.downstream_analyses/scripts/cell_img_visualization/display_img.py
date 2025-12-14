@@ -165,17 +165,16 @@ GFP_INTENSITY_COLUMN = "Cells_Intensity_IntegratedIntensity_GFP" ## Cells_Intens
 #         alleles = profiles.select("Protein_label").to_series().unique().to_list()
 #         batch_profiles[batch_id] = profiles
 
-# Pickle the metadata dictionary
-_BATCH_PROF_DICT_PATH = os.path.join(_REPO_ROOT, "2.snakemake_pipeline/outputs/visualize_cells/batch_prof_dict.pkl")
-# with open(_BATCH_PROF_DICT_PATH, "wb") as f:
-#     pickle.dump(batch_profiles, f, pickle.HIGHEST_PROTOCOL)
+# # Pickle the metadata dictionary
+# _BATCH_PROF_DICT_PATH = os.path.join(_REPO_ROOT, "2.snakemake_pipeline/outputs/visualize_cells/batch_prof_dict.pkl")
+# # with open(_BATCH_PROF_DICT_PATH, "wb") as f:
+# #     pickle.dump(batch_profiles, f, pickle.HIGHEST_PROTOCOL)
+# # To load the dictionary and DataFrames later
+# with open(_BATCH_PROF_DICT_PATH, "rb") as f:
+#     batch_profiles = pickle.load(f)
 
-# To load the dictionary and DataFrames later
-with open(_BATCH_PROF_DICT_PATH, "rb") as f:
-    batch_profiles = pickle.load(f)
 
-
-def plot_allele(pm, ref, var, sel_channel, plate_img_qc, auroc_df=None, site="05", ref_well=[], var_well=[], max_intensity=0.99, display=False, imgs_dir="", output_dir=""):
+def plot_allele(pm, ref, var, sel_channel, plate_img_qc, auroc_df=None, site="05", ref_well=[], var_well=[], vmin=1., vmax=99., show_plot=False, imgs_dir="", output_dir=""):
     assert imgs_dir != "", "Image directory has to be input!"
     plt.clf()
     cmap = channel_to_cmap(sel_channel)
@@ -195,12 +194,6 @@ def plot_allele(pm, ref, var, sel_channel, plate_img_qc, auroc_df=None, site="05
         wt_wells = [well for well in wt_wells if well in ref_well]
     if var_well:
         var_wells = [well for well in var_wells if well in var_well]
-    
-    # if len(wt_wells) > 1:
-    #     # Get coordinates of wells
-    #     well_coords = [well_to_coordinates(w) for w in set([ref_well_pl for ref_well_pl in wt_wells])]
-    #     # Sort wells by max distance from edges (descending)
-    #     wt_wells = [max(well_coords, key=lambda x: compute_distance(x[1], x[2]))[0]]
 
     pm_var = pm.filter(
         (pl.col("imaging_well").is_in(np.concatenate([wt_wells, var_wells]))),
@@ -209,19 +202,10 @@ def plot_allele(pm, ref, var, sel_channel, plate_img_qc, auroc_df=None, site="05
 
     fig, axes = plt.subplots((len(wt_wells)+len(var_wells))*2, 4, figsize=(15, (len(wt_wells)+len(var_wells))*8), sharex=True, sharey=True)
     for wt_var, pm_row in enumerate(pm_var.iter_rows(named=True)):
-        # if "allele" in pm_row["node_type"]:
-        #     if pm_row["node_type"] == "allele":
-        #         well = var_wells[0]
-        #         allele = var
-        #     else:
-        #         well = wt_wells[0]
-        #         allele = ref
-        # else:
-        if pm_row["imaging_well"] in wt_wells:
-            well = wt_wells[0]
+        well = pm_row["imaging_well"]  # Use the actual well from the current row
+        if well in wt_wells:
             allele = ref
         else:
-            well = var_wells[0]
             allele = var
 
         for i in range(8):
@@ -244,16 +228,16 @@ def plot_allele(pm, ref, var, sel_channel, plate_img_qc, auroc_df=None, site="05
             
             plate_img_dir = plate_dict[sel_plate][f"T{i%4+1}"]
             img_file = f"r{row}c{col}f{site}p01-ch{channel}sk1fk1fl1.tiff"
-
             # print(batch, well, plate_img_dir, img_file)
-            # break
 
             if plate_img_qc is not None:
-                is_bg_array = plate_img_qc.filter(
+                img_qc_df = plate_img_qc.filter(
                     (pl.col("plate") == plate_img_dir.split("__")[0])
                     & (pl.col("well") == well)
                     & (pl.col("channel") == sel_channel)
-                )["is_bg"].to_numpy()
+                )
+                # print(img_qc_df)
+                is_bg_array = img_qc_df["is_bg"].to_numpy()
                 if is_bg_array.size > 0:
                     is_bg = is_bg_array[0]
                 else:
@@ -276,8 +260,11 @@ def plot_allele(pm, ref, var, sel_channel, plate_img_qc, auroc_df=None, site="05
                 img = imread(f"{batch_img_dir}/{plate_img_dir}/Images/{img_file}", as_gray=True)
             
             plot_idx = i+wt_var*4*2
-            # print(i, wt_var, plot_idx)
-            axes.flatten()[plot_idx].imshow(img, vmin=0, vmax=np.percentile(img, max_intensity*100), cmap=cmap)
+            # Calculate display bounds from raw data (no normalization - display only)
+            display_vmin = np.percentile(img, vmin)
+            display_vmax = np.percentile(img, vmax)
+            
+            axes.flatten()[plot_idx].imshow(img, vmin=display_vmin, vmax=display_vmax, cmap=cmap)
             plot_label = f"{sel_channel}:{sel_plate},T{i%4+1}\nWell:{well},Site:{site}\n{allele}"
             axes.flatten()[plot_idx].text(0.03, 0.97, plot_label, color='white', fontsize=10,
                     verticalalignment='top', horizontalalignment='left', transform=axes.flatten()[plot_idx].transAxes,
@@ -287,7 +274,7 @@ def plot_allele(pm, ref, var, sel_channel, plate_img_qc, auroc_df=None, site="05
                     verticalalignment='bottom', horizontalalignment='left', transform=axes.flatten()[plot_idx].transAxes,
                     bbox=dict(facecolor='white', alpha=0.3, linewidth=2))
             int_95 = str(int(round(np.percentile(img, 95))))
-            axes.flatten()[plot_idx].text(0.97, 0.03, f"95th Intensity:{int_95}\nSet vmax:{max_intensity*100:.0f}th perc.", color='white', fontsize=10,
+            axes.flatten()[plot_idx].text(0.97, 0.03, f"95th Intensity:{int_95}\nvmin:{vmin:.1f}%\nvmax:{vmax:.1f}%", color='white', fontsize=10,
                            verticalalignment='bottom', horizontalalignment='right', transform=axes.flatten()[plot_idx].transAxes,
                            bbox=dict(facecolor='black', alpha=0.3, linewidth=2))
             axes.flatten()[plot_idx].axis("off")
@@ -295,7 +282,7 @@ def plot_allele(pm, ref, var, sel_channel, plate_img_qc, auroc_df=None, site="05
     plt.tight_layout()
     plt.subplots_adjust(wspace=.01, hspace=-0.2, top=.99)
     
-    if display:
+    if show_plot:
         plt.show()
     
     if output_dir:
@@ -311,7 +298,7 @@ def plot_allele(pm, ref, var, sel_channel, plate_img_qc, auroc_df=None, site="05
     plt.close(fig)
 
 
-def plot_allele_single_plate(pm, variant, sel_channel, plate_img_qc, auroc_df=None, site="05", ref_well=[], var_well=[], max_intensity=0.99, display=False, imgs_dir="", output_dir=""):
+def plot_allele_single_plate(pm, variant, sel_channel, plate_img_qc, auroc_df=None, site="05", ref_well=[], var_well=[], vmin=1., vmax=99., show_plot=False, imgs_dir="", output_dir=""):
     assert imgs_dir != "", "Image directory has to be input!"
     plt.clf()
     cmap = channel_to_cmap(sel_channel)
@@ -396,7 +383,11 @@ def plot_allele_single_plate(pm, variant, sel_channel, plate_img_qc, auroc_df=No
             img = imread(f"{batch_img_dir}/{plate_img_dir}/Images/{img_file}", as_gray=True)
         
         # print(i, wt_var, plot_idx)
-        axes.flatten()[plot_idx].imshow(img, vmin=0, vmax=np.percentile(img, max_intensity*100), cmap=cmap)
+        # Calculate display bounds from raw data (no normalization - display only)
+        display_vmin = np.percentile(img, vmin)
+        display_vmax = np.percentile(img, vmax)
+        
+        axes.flatten()[plot_idx].imshow(img, vmin=display_vmin, vmax=display_vmax, cmap=cmap)
         plot_label = f"{sel_channel}:{sel_plate}\nWell:{well},Site:{site}\n{allele}"
         axes.flatten()[plot_idx].text(0.03, 0.97, plot_label, color='white', fontsize=10,
                 verticalalignment='top', horizontalalignment='left', transform=axes.flatten()[plot_idx].transAxes,
@@ -406,7 +397,7 @@ def plot_allele_single_plate(pm, variant, sel_channel, plate_img_qc, auroc_df=No
                 verticalalignment='bottom', horizontalalignment='left', transform=axes.flatten()[plot_idx].transAxes,
                 bbox=dict(facecolor='white', alpha=0.3, linewidth=2))
         int_95 = str(int(round(np.percentile(img, 95))))
-        axes.flatten()[plot_idx].text(0.97, 0.03, f"95th Intensity:{int_95}\nSet vmax:{max_intensity*100:.0f}th perc.", color='white', fontsize=10,
+        axes.flatten()[plot_idx].text(0.97, 0.03, f"95th Intensity:{int_95}\nvmin:{vmin:.1f}%\nvmax:{vmax:.1f}%", color='white', fontsize=10,
                        verticalalignment='bottom', horizontalalignment='right', transform=axes.flatten()[plot_idx].transAxes,
                        bbox=dict(facecolor='black', alpha=0.3, linewidth=2))
         axes.flatten()[plot_idx].axis("off")
@@ -414,7 +405,7 @@ def plot_allele_single_plate(pm, variant, sel_channel, plate_img_qc, auroc_df=No
     plt.tight_layout()
     plt.subplots_adjust(wspace=.01, hspace=-0.2, top=.99)
     
-    if display:
+    if show_plot:
         plt.show()
         
     file_name = f"{variant}_{sel_channel}"

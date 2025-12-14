@@ -7,9 +7,6 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-## allele collection direcotory
-# ALLELE_COLLECT_DIR = "../../../../../../../1_allele_collection"
-
 ## snakemake pipeline directory
 SNAKEMAKE_PIPELINE_DIR = "/home/shenrunx/igvf/varchamp/2025_varchamp_snakemake"
 
@@ -18,15 +15,17 @@ TIFF_IMGS_DIR = f"{SNAKEMAKE_PIPELINE_DIR}/1.image_preprocess_qc/inputs/cpg_imgs
 
 ## meta platemap directory, stores the allele location on each well and plate
 PLATEMAP_DIR = f"{SNAKEMAKE_PIPELINE_DIR}/2.snakemake_pipeline/inputs/metadata/platemaps/" + "{batch_id}/platemap"
+IMG_METADATA_PARQUET_FILE = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/inputs/1.plate_well_qc_metrics/allele_meta_df.parquet"
 
 ## IMG QC related directories
-IMGS_QC_BG_SUM_DIR = f"{SNAKEMAKE_PIPELINE_DIR}/1.image_preprocess_qc/outputs/plate_bg_summary"
+IMGS_QC_BG_SUM_DIR = f"{SNAKEMAKE_PIPELINE_DIR}/1.image_preprocess_qc/outputs/sum_stats_parquet"
 IMGS_QC_METRICS_DIR = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/inputs/1.plate_well_qc_metrics"
+IMG_QC_SUM_PARQUET_FILE = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/outputs/0.img_metadata_qc/img_well_qc_sum_df.parquet"
 
-IMG_METADATA_FILE = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/outputs/0.img_metadata_qc/allele_meta_df.csv"
-IMG_METADATA_DICT_FILE = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/outputs/0.img_metadata_qc/allele_meta_df_dict.pckl"
-IMG_QC_SUM_DF_FILE = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/outputs/0.img_metadata_qc/img_well_qc_sum_df.csv"
-IMG_QC_SUM_DICT_FILE = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/outputs/0.img_metadata_qc/img_well_qc_sum_dict.pckl"
+# IMG_METADATA_FILE = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/inputs/0.img_metadata_qc/allele_meta_df.csv"
+# IMG_METADATA_DICT_FILE = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/outputs/0.img_metadata_qc/allele_meta_df_dict.pckl"  # DEPRECATED - use IMG_METADATA_PARQUET_FILE
+# IMG_QC_SUM_DF_FILE = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/outputs/0.img_metadata_qc/img_well_qc_sum_df.csv"
+# IMG_QC_SUM_DICT_FILE = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/outputs/0.img_metadata_qc/img_well_qc_sum_dict.pckl"  # DEPRECATED - use IMG_QC_SUM_PARQUET_FILE
 
 ## batch profiles directory
 PROF_DIR = f"{SNAKEMAKE_PIPELINE_DIR}/2.snakemake_pipeline/outputs/batch_profiles"
@@ -58,6 +57,12 @@ BATCH_LIST_DICT = {
     "2025_06_10_Batch_19": "2025_06_Batch_18-19"
 }
 
+BIO_REP_BATCHES_DICT_ONEPERC = {
+    "2024_01_Batch_7-8": ("2024_01_23_Batch_7", "2024_02_06_Batch_8"),
+    "2024_12_Batch_11-12": ("2024_12_09_Batch_11", "2024_12_09_Batch_12"),
+    "2025_01_Batch_13-14": ("2025_01_27_Batch_13", "2025_01_28_Batch_14"),
+    "2025_03_Batch_15-16": ("2025_03_17_Batch_15", "2025_03_17_Batch_16")
+}
 
 BIO_REP_BATCHES_DICT = {
     "2024_01_Batch_7-8": ("2024_01_23_Batch_7", "2024_02_06_Batch_8"),
@@ -66,7 +71,6 @@ BIO_REP_BATCHES_DICT = {
     "2025_01_Batch_13-14": ("2025_01_27_Batch_13", "2025_01_28_Batch_14"),
     "2025_06_Batch_18-19": ("2025_06_10_Batch_18", "2025_06_10_Batch_19")
 }
-
 
 BIO_BATCH_MAP_DICT = {
     "B7": "B_7-8",
