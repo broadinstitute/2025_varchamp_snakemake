@@ -1,8 +1,0 @@
-VarChAMP Cluster-Disease Module Analysis - Final Summary
-============================================================
-
-Total Variants: 227
-Total Clusters: 10
-Total Features Tested: 109
-Clusters With Significant Features: 9
-Total Significant Features: 466
