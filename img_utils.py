@@ -209,6 +209,12 @@ plate_dict = {
         "T3": '2025-03-17_B16A1A2_P1T1__2025-03-17T13_48_08-Measurement_1',
         "T4": '2025-03-18_B16A1A2_P1T4__2025-03-18T11_18_31-Measurement_1'
     },
+    "B16A1A2P1_R1": {
+        "T1": '2025-03-18_B16A1A2_P1T2__2025-03-18T08_45_49-Measurement_1',
+        "T2": '2025-03-18_B16A1A2_P1T3__2025-03-18T10_08_59-Measurement_1',
+        "T3": '2025-03-17_B16A1A2_P1T1__2025-03-17T13_48_08-Measurement_1',
+        "T4": '2025-03-18_B16A1A2_P1T4__2025-03-18T11_18_31-Measurement_1'
+    },
     "B16A1A2_P1": {  # Alias for Metadata_plate_map_name format
         "T1": '2025-03-18_B16A1A2_P1T2__2025-03-18T08_45_49-Measurement_1',
         "T2": '2025-03-18_B16A1A2_P1T3__2025-03-18T10_08_59-Measurement_1',
