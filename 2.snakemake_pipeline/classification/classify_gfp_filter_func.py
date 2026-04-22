@@ -224,7 +224,7 @@ def find_optimal_gfp_range_fast(ref_gfp: np.ndarray, var_gfp: np.ndarray,
     if ref_count == 0 or var_count == 0:
         ratio_status = "Zero samples"
     else:
-        ratio_status = f"{max(ref_count, var_count) / min(ref_count, var_count)}:.2f"
+        ratio_status = f"{max(ref_count, var_count) / min(ref_count, var_count):.2f}"
     
     results.append((f"{int(low_q*100)}-{int(high_q*100)}%", ref_count, var_count, 
                     ref_count + var_count, f"GFP: {range_min:.1f}-{range_max:.1f}", ratio_status))
@@ -558,6 +558,7 @@ def stratify_by_well_pair_exp_gfp_filtered(df_sampled: pd.DataFrame, well_pair_l
 
     if df_sampled_filtered.shape[0] == 0:
         log_file.write(f"{key}, {subkey}, {ref_var}, Failed to correct for GFP on ANY PLATE and WELL pair. Skipping...\n")
+        return pd.DataFrame(), pd.DataFrame()
 
     log_file.write(f"{key}, {subkey}, {ref_var}, Corrected GFP paired t-test:")
     df_sampled_filterd_well_agg = pl.DataFrame(
