@@ -82,8 +82,14 @@ from utils import find_feat_cols, find_meta_cols, remove_nan_infs_columns
 from .classify_helper_func import get_classifier_features, classifier
 from .classify_single_rep_per_plate import get_common_plates, stratify_by_plate
 
-# Constants
-GFP_INTENSITY_COLUMN = "Cells_Intensity_IntegratedIntensity_GFP"  # Cells_Intensity_MeanIntensity_GFP is another option
+# GFP intensity column - default matches legacy behavior; override via set_gfp_intensity_column()
+GFP_INTENSITY_COLUMN = "Cells_Intensity_IntegratedIntensity_GFP"
+
+def set_gfp_intensity_column(channel_name: str = "GFP"):
+    """Set the GFP intensity column based on channel name (e.g., 'GFP' or 'Protein')"""
+    global GFP_INTENSITY_COLUMN
+    GFP_INTENSITY_COLUMN = f"Cells_Intensity_IntegratedIntensity_{channel_name}"
+    return GFP_INTENSITY_COLUMN
 
 #######################################
 # GFP-INTENSITY CORRECTED CLASSIFICATION
@@ -265,7 +271,7 @@ def experimental_runner_filter_gfp(
     feat_cols = [i for i in feat_cols if i != "Label"]
 
     if len(feat_cols) == 0:
-        return pd.DataFrame(), pd.DataFrame()
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
     group_list = []
     pair_list = []
@@ -623,7 +629,7 @@ def experimental_runner_plate_rep_gfp_filtered(
     feat_cols = [i for i in feat_cols if i != "Label"]
 
     if len(feat_cols) == 0:
-        return pd.DataFrame(), pd.DataFrame()
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
     group_list = []
     pair_list = []

@@ -21,9 +21,10 @@ rule classify:
     params:
         cc_thresh = config["cc_threshold"],
         plate_layout = config["plate_layout"],
+        protein_channel = config.get("protein_channel_name", "GFP"),
     run:
         try:
-            classification.run_classify_workflow(*input, *output, cc_threshold=params.cc_thresh, plate_layout=params.plate_layout)
+            classification.run_classify_workflow(*input, *output, cc_threshold=params.cc_thresh, plate_layout=params.plate_layout, protein_channel_name=params.protein_channel)
         finally:
             # Force system-wide cleanup
             import gc

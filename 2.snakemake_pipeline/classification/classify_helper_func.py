@@ -10,6 +10,17 @@ from utils import find_feat_cols, find_meta_cols
 
 # Constants
 FEAT_TYPE_SET = ["GFP", "DNA", "AGP", "Mito", "Morph"] ##, "DNA", "AGP", "Mito", "Morph", temporarily disable other channels
+PROTEIN_CHANNEL_NAME = "GFP"  # Default protein channel name, can be overridden
+
+def set_protein_channel_name(channel_name: str = "GFP"):
+    """Set the protein channel name for feature selection.
+
+    This allows handling batches where the protein channel is named differently
+    (e.g., 'Protein' instead of 'GFP').
+    """
+    global PROTEIN_CHANNEL_NAME
+    PROTEIN_CHANNEL_NAME = channel_name
+    return PROTEIN_CHANNEL_NAME
 
 # GPU Management
 def get_available_gpu():
@@ -97,30 +108,41 @@ def drop_low_cc_wells(dframe, cc_thresh, log_file):
 
 
 def get_classifier_features(dframe: pd.DataFrame, feat_type: str):
-    """Helper function to get dframe containing protein or non-protein features"""
+    """Return dframe restricted to the metadata + feature columns belonging to feat_type.
+
+    "GFP" selects the protein channel (using PROTEIN_CHANNEL_NAME, which may be
+    "GFP" or "Protein" depending on the batch). "Morph" excludes the protein
+    channel. Other channels (DNA, AGP, Mito) select that channel while also
+    excluding the protein channel. Brightfield and TxControl features are always
+    excluded.
+    """
     assert feat_type in FEAT_TYPE_SET, f"ONLY features in {FEAT_TYPE_SET} are allowed"
     feat_col = find_feat_cols(dframe)
     meta_col = find_meta_cols(dframe)
 
+    protein_lower = PROTEIN_CHANNEL_NAME.lower()
+
     if feat_type == "GFP":
         feat_col = [
-            i
-            for i in feat_col
-            if (feat_type.lower() in i.lower())
-            and ("Brightfield" not in i) ## excluding Brightfield features
+            i for i in feat_col
+            if (protein_lower in i.lower())
+            and ("Brightfield" not in i)
+            and ("TxControl" not in i)
         ]
     elif feat_type == "Morph":
         feat_col = [
-            i
-            for i in feat_col
-            if ("GFP" not in i) and ("Brightfield" not in i) and ("TxControl" not in i)
+            i for i in feat_col
+            if (protein_lower not in i.lower())
+            and ("Brightfield" not in i)
+            and ("TxControl" not in i)
         ]
     else:
         feat_col = [
-            i
-            for i in feat_col
+            i for i in feat_col
             if (feat_type.lower() in i.lower())
-            and ("Brightfield" not in i) and ("GFP" not in i) and ("TxControl" not in i) ## excluding Brightfield features and GFP features for other channel
+            and (protein_lower not in i.lower())
+            and ("Brightfield" not in i)
+            and ("TxControl" not in i)
         ]
 
     dframe = pd.concat([dframe[meta_col], dframe[feat_col]], axis=1)
