@@ -45,16 +45,18 @@ CLASS_SUMMARY_DIR = f"{SNAKEMAKE_PIPELINE_DIR}/3.downstream_analyses/outputs/2.c
 FEAT_SETS = ["GFP", "DNA", "Mito", "AGP", "Morph"]
 
 BATCH_LIST_DICT = {
-    "2024_01_23_Batch_7": "2024_02_Batch_7-8", 
+    "2024_01_23_Batch_7": "2024_02_Batch_7-8",
     "2024_02_06_Batch_8": "2024_02_Batch_7-8",
-    "2024_12_09_Batch_11": "2024_12_Batch_11-12", 
+    "2024_12_09_Batch_11": "2024_12_Batch_11-12",
     "2024_12_09_Batch_12": "2024_12_Batch_11-12",
-    "2025_01_27_Batch_13": "2025_01_Batch_13-14", 
+    "2025_01_27_Batch_13": "2025_01_Batch_13-14",
     "2025_01_28_Batch_14": "2025_01_Batch_13-14",
-    "2025_03_17_Batch_15": "2025_03_Batch_15-16", 
+    "2025_03_17_Batch_15": "2025_03_Batch_15-16",
     "2025_03_17_Batch_16": "2025_03_Batch_15-16",
     "2025_06_10_Batch_18": "2025_06_Batch_18-19",
-    "2025_06_10_Batch_19": "2025_06_Batch_18-19"
+    "2025_06_10_Batch_19": "2025_06_Batch_18-19",
+    "2026_01_05_Batch_20": "2026_01_Batch_20-21",
+    "2026_01_05_Batch_21": "2026_01_Batch_20-21"
 }
 
 BIO_REP_BATCHES_DICT_ONEPERC = {
@@ -69,7 +71,8 @@ BIO_REP_BATCHES_DICT = {
     "2024_12_Batch_11-12": ("2024_12_09_Batch_11", "2024_12_09_Batch_12"),
     "2025_03_Batch_15-16": ("2025_03_17_Batch_15", "2025_03_17_Batch_16"),
     "2025_01_Batch_13-14": ("2025_01_27_Batch_13", "2025_01_28_Batch_14"),
-    "2025_06_Batch_18-19": ("2025_06_10_Batch_18", "2025_06_10_Batch_19")
+    "2025_06_Batch_18-19": ("2025_06_10_Batch_18", "2025_06_10_Batch_19"),
+    "2026_01_Batch_20-21": ("2026_01_05_Batch_20", "2026_01_05_Batch_21")
 }
 
 BIO_BATCH_MAP_DICT = {
@@ -83,6 +86,8 @@ BIO_BATCH_MAP_DICT = {
     "B14": "B_13-14",
     "B18": "B_18-19",
     "B19": "B_18-19",
+    "B20": "B_20-21",
+    "B21": "B_20-21",
 }
 
 
@@ -139,7 +144,13 @@ batch_dict = {
     "B16A1A2P1": "2025_03_17_Batch_16",
     "B16A1A2": "2025_03_17_Batch_16",  # Alternative key for Metadata_plate_map_name format
     "B18A8A10R1": "2025_06_10_Batch_18",
-    "B19A8A10R1": "2025_06_10_Batch_19"
+    "B19A8A10R1": "2025_06_10_Batch_19",
+    "B20_A11_P1": "2026_01_05_Batch_20",
+    "B20P1": "2026_01_05_Batch_20",
+    "B20": "2026_01_05_Batch_20",  # Short prefix from plate_map_name split
+    "B21_A11_P1": "2026_01_05_Batch_21",
+    "B21P1": "2026_01_05_Batch_21",
+    "B21": "2026_01_05_Batch_21"  # Short prefix from plate_map_name split
 }
 
 
@@ -301,6 +312,34 @@ plate_dict = {
                   "T2": "2024_02_05_B8A1R2_P4T2__2024_02_05T08_22_47_Measurement_2",
                   "T3": "2024_02_05_B8A1R2_P4T3__2024_02_05T10_00_30_Measurement_1",
                   "T4": "2024_02_05_B8A1R2_P4T4__2024_02_05T11_38_50_Measurement_1"},
+
+    ## Batch 20 (PIGN batch)
+    "B20_A11_P1": {
+        "T1": "2025_11_04_B20P1T1__2025-11-04T10_05_34-Measurement1",
+        "T2": "2025_11_04_B20P1T2__2025-11-04T11_26_54-Measurement1",
+        "T3": "2025_11_05_B20P1T3__2025-11-05T09_59_45-Measurement1",
+        "T4": "2025_11_04_B20P1T4__2025-11-04T08_26_01-Measurement2"
+    },
+    "B20P1": {  # Alias for plate barcode format
+        "T1": "2025_11_04_B20P1T1__2025-11-04T10_05_34-Measurement1",
+        "T2": "2025_11_04_B20P1T2__2025-11-04T11_26_54-Measurement1",
+        "T3": "2025_11_05_B20P1T3__2025-11-05T09_59_45-Measurement1",
+        "T4": "2025_11_04_B20P1T4__2025-11-04T08_26_01-Measurement2"
+    },
+
+    ## Batch 21 (PIGN batch)
+    "B21_A11_P1": {
+        "T1": "2025_11_05_B21P1T1__2025-11-05T11_45_23-Measurement1",
+        "T2": "2025_11_07_B21P1T2__2025-11-07T08_31_40-Measurement2",
+        "T3": "2025_11_06_B21P1T3__2025-11-06T08_24_10-Measurement1",
+        "T4": "2025_11_07_B21P1T4__2025-11-07T10_12_39-Measurement1"
+    },
+    "B21P1": {  # Alias for plate barcode format
+        "T1": "2025_11_05_B21P1T1__2025-11-05T11_45_23-Measurement1",
+        "T2": "2025_11_07_B21P1T2__2025-11-07T08_31_40-Measurement2",
+        "T3": "2025_11_06_B21P1T3__2025-11-06T08_24_10-Measurement1",
+        "T4": "2025_11_07_B21P1T4__2025-11-07T10_12_39-Measurement1"
+    },
 }
 
 
