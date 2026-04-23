@@ -1,0 +1,739 @@
+====================================================================================================
+PIGN VARIANT PER-CHANNEL MISLOCALIZATION ANALYSIS REPORT
+====================================================================================================
+
+Total PIGN variants analyzed: 108
+
+SUMMARY OF SIGNIFICANT VARIANTS PER CHANNEL (AUROC > 0.9):
+----------------------------------------------------------------------------------------------------
+DNA         :  50 variants with AUROC > 0.9
+AGP         :  44 variants with AUROC > 0.9
+Protein     :  46 variants with AUROC > 0.9
+Morph       :  59 variants with AUROC > 0.9
+
+
+====================================================================================================
+DNA CHANNEL RESULTS
+====================================================================================================
+
+Significant Variants (DNA AUROC > 0.9): 50
+----------------------------------------------------------------------------------------------------
+Rank  Variant                            AUROC       Altered_95th   
+----------------------------------------------------------------------------------------------------
+1     PIGN_Ile455Val                     0.997721    Yes            
+2     PIGN_Ala813Thr                     0.996068    Yes            
+3     PIGN_Pro384Leu                     0.992092    Yes            
+4     PIGN_Arg565Leu                     0.990438    Yes            
+5     PIGN_Ser859Arg                     0.989923    Yes            
+6     PIGN_Ser135Asn                     0.981456    Yes            
+7     PIGN_Phe598Ser                     0.979715    Yes            
+8     PIGN_Val473Ala                     0.979530    Yes            
+9     PIGN_Val417Met                     0.977935    Yes            
+10    PIGN_Tyr249Cys                     0.977089    Yes            
+11    PIGN_Ala690Ser                     0.975295    Yes            
+12    PIGN_Arg95Gln                      0.974642    Yes            
+13    PIGN_Asn446Ser                     0.974474    Yes            
+14    PIGN_Ala503Val                     0.973651    Yes            
+15    PIGN_Thr582Ala                     0.973358    Yes            
+16    PIGN_Phe707Leu                     0.973342    Yes            
+17    PIGN_Met590Leu                     0.973086    Yes            
+18    PIGN_Val742Phe                     0.970573    Yes            
+19    PIGN_Asp124Asn                     0.966312    Yes            
+20    PIGN_Ile765Val                     0.966223    Yes            
+21    PIGN_Ser194Phe                     0.966146    Yes            
+22    PIGN_Leu427Pro                     0.964430    Yes            
+23    PIGN_Arg565His                     0.964315    Yes            
+24    PIGN_Trp578Cys                     0.962927    Yes            
+25    PIGN_Lys834Arg                     0.962019    Yes            
+26    PIGN_Phe767Leu                     0.961635    Yes            
+27    PIGN_Arg709Leu                     0.958111    Yes            
+28    PIGN_Gln748Glu                     0.956526    Yes            
+29    PIGN_His188Tyr                     0.956040    No             
+30    PIGN_Ser26Cys                      0.954924    Yes            
+31    PIGN_Val534Ile                     0.952582    Yes            
+32    PIGN_Met901Val                     0.950318    No             
+33    PIGN_Val698Gly                     0.949504    Yes            
+34    PIGN_Met621Lys                     0.947691    Yes            
+35    PIGN_Gly924Ser                     0.943652    Yes            
+36    PIGN_Leu383Val                     0.936580    Yes            
+37    PIGN_Ala550Thr                     0.928974    Yes            
+38    PIGN_Ser637Thr                     0.924110    No             
+39    PIGN_Gly472Asp                     0.923955    No             
+40    PIGN_Val477Glu                     0.923895    No             
+41    PIGN_Ser856Leu                     0.917159    No             
+42    PIGN_Leu841Pro                     0.917155    No             
+43    PIGN_Ala490Val                     0.916806    No             
+44    PIGN_Ser138Arg                     0.915866    No             
+45    PIGN_Gln530Arg                     0.915240    No             
+46    PIGN_Leu629Pro                     0.914460    No             
+47    PIGN_Val242Leu                     0.912804    No             
+48    PIGN_Val473Ile                     0.911965    No             
+49    PIGN_Ser594Arg                     0.909544    No             
+50    PIGN_Gly554Arg                     0.900922    No             
+
+All PIGN Variants (sorted by DNA AUROC):
+----------------------------------------------------------------------------------------------------
+Rank  Variant                            AUROC       Significant    
+----------------------------------------------------------------------------------------------------
+1     PIGN_Ile455Val                     0.997721    ***            
+2     PIGN_Ala813Thr                     0.996068    ***            
+3     PIGN_Pro384Leu                     0.992092    ***            
+4     PIGN_Arg565Leu                     0.990438    ***            
+5     PIGN_Ser859Arg                     0.989923    ***            
+6     PIGN_Ser135Asn                     0.981456    ***            
+7     PIGN_Phe598Ser                     0.979715    ***            
+8     PIGN_Val473Ala                     0.979530    ***            
+9     PIGN_Val417Met                     0.977935    ***            
+10    PIGN_Tyr249Cys                     0.977089    ***            
+11    PIGN_Ala690Ser                     0.975295    ***            
+12    PIGN_Arg95Gln                      0.974642    ***            
+13    PIGN_Asn446Ser                     0.974474    ***            
+14    PIGN_Ala503Val                     0.973651    ***            
+15    PIGN_Thr582Ala                     0.973358    ***            
+16    PIGN_Phe707Leu                     0.973342    ***            
+17    PIGN_Met590Leu                     0.973086    ***            
+18    PIGN_Val742Phe                     0.970573    ***            
+19    PIGN_Asp124Asn                     0.966312    ***            
+20    PIGN_Ile765Val                     0.966223    ***            
+21    PIGN_Ser194Phe                     0.966146    ***            
+22    PIGN_Leu427Pro                     0.964430    ***            
+23    PIGN_Arg565His                     0.964315    ***            
+24    PIGN_Trp578Cys                     0.962927    ***            
+25    PIGN_Lys834Arg                     0.962019    ***            
+26    PIGN_Phe767Leu                     0.961635    ***            
+27    PIGN_Arg709Leu                     0.958111    ***            
+28    PIGN_Gln748Glu                     0.956526    ***            
+29    PIGN_His188Tyr                     0.956040    ***            
+30    PIGN_Ser26Cys                      0.954924    ***            
+31    PIGN_Val534Ile                     0.952582    ***            
+32    PIGN_Met901Val                     0.950318    ***            
+33    PIGN_Val698Gly                     0.949504    ***            
+34    PIGN_Met621Lys                     0.947691    ***            
+35    PIGN_Gly924Ser                     0.943652    ***            
+36    PIGN_Leu383Val                     0.936580    ***            
+37    PIGN_Ala550Thr                     0.928974    ***            
+38    PIGN_Ser637Thr                     0.924110    ***            
+39    PIGN_Gly472Asp                     0.923955    ***            
+40    PIGN_Val477Glu                     0.923895    ***            
+41    PIGN_Ser856Leu                     0.917159    ***            
+42    PIGN_Leu841Pro                     0.917155    ***            
+43    PIGN_Ala490Val                     0.916806    ***            
+44    PIGN_Ser138Arg                     0.915866    ***            
+45    PIGN_Gln530Arg                     0.915240    ***            
+46    PIGN_Leu629Pro                     0.914460    ***            
+47    PIGN_Val242Leu                     0.912804    ***            
+48    PIGN_Val473Ile                     0.911965    ***            
+49    PIGN_Ser594Arg                     0.909544    ***            
+50    PIGN_Gly554Arg                     0.900922    ***            
+51    PIGN_Ile686Val                     0.899799                   
+52    PIGN_Pro335Leu                     0.894335                   
+53    PIGN_Gly217Arg                     0.891754                   
+54    PIGN_Glu122Ala                     0.883700                   
+55    PIGN_Asp531Glu                     0.882007                   
+56    PIGN_Met328Ile                     0.880542                   
+57    PIGN_Asn770Ser                     0.879057                   
+58    PIGN_Arg221Leu                     0.878831                   
+59    PIGN_Asn313Thr                     0.878466                   
+60    PIGN_Phe825Leu                     0.875897                   
+61    PIGN_Ile744Val                     0.873172                   
+62    PIGN_Gly883Ser                     0.861201                   
+63    PIGN_Met832Leu                     0.860094                   
+64    PIGN_Ser893Arg                     0.860086                   
+65    PIGN_Leu680Val                     0.859955                   
+66    PIGN_Gly755Asp                     0.855225                   
+67    PIGN_Tyr769Cys                     0.854534                   
+68    PIGN_Asn246Tyr                     0.854202                   
+69    PIGN_Val510Ile                     0.850435                   
+70    PIGN_Arg295Ile                     0.849916                   
+71    PIGN_Asp252Tyr                     0.834789                   
+72    PIGN_Ile85Val                      0.832099                   
+73    PIGN_Ala304Val                     0.827233                   
+74    PIGN_Asn320Ser                     0.826986                   
+75    PIGN_Thr917Met                     0.825929                   
+76    PIGN_Ala161Val                     0.822487                   
+77    PIGN_Glu61Lys                      0.822180                   
+78    PIGN_Glu240Val                     0.820152                   
+79    PIGN_Ala405Thr                     0.814671                   
+80    PIGN_Gly250Glu                     0.805913                   
+81    PIGN_Tyr132His                     0.803932                   
+82    PIGN_Tyr438Cys                     0.803868                   
+83    PIGN_Met843Thr                     0.802889                   
+84    PIGN_Thr156Ala                     0.802197                   
+85    PIGN_Tyr227His                     0.801714                   
+86    PIGN_Thr281Ser                     0.797545                   
+87    PIGN_Gly104Arg                     0.795076                   
+88    PIGN_Ser535Pro                     0.792310                   
+89    PIGN_Val296Ile                     0.779900                   
+90    PIGN_Val864Ile                     0.774057                   
+91    PIGN_Pro71Leu                      0.773242                   
+92    PIGN_Phe145Leu                     0.770554                   
+93    PIGN_Leu368Phe                     0.743453                   
+94    PIGN_Ser823Arg                     0.742626                   
+95    PIGN_Ala56Val                      0.741264                   
+96    PIGN_Ala521Val                     0.727552                   
+97    PIGN_Ile804Met                     0.725830                   
+98    PIGN_Val154Ile                     0.720665                   
+99    PIGN_Lys162Glu                     0.719366                   
+100   PIGN_Ser900Cys                     0.701153                   
+101   PIGN_Val373Leu                     0.678937                   
+102   PIGN_Ile258Val                     0.672575                   
+103   PIGN_His188Asn                     0.649039                   
+104   PIGN_Asn67Ser                      0.636518                   
+105   PIGN_His188Pro                     0.613593                   
+106   PIGN_His466Tyr                     0.603616                   
+107   PIGN_Val791Phe                     0.594507                   
+108   PIGN_Val879Ala                     0.593952                   
+
+====================================================================================================
+AGP CHANNEL RESULTS
+====================================================================================================
+
+Significant Variants (AGP AUROC > 0.9): 44
+----------------------------------------------------------------------------------------------------
+Rank  Variant                            AUROC       Altered_95th   
+----------------------------------------------------------------------------------------------------
+1     PIGN_Ile455Val                     0.996821    Yes            
+2     PIGN_Ser859Arg                     0.994208    Yes            
+3     PIGN_Arg565Leu                     0.993555    Yes            
+4     PIGN_Tyr249Cys                     0.993118    Yes            
+5     PIGN_Ala813Thr                     0.992901    Yes            
+6     PIGN_Ser135Asn                     0.991486    Yes            
+7     PIGN_Phe598Ser                     0.988126    Yes            
+8     PIGN_Val417Met                     0.987620    Yes            
+9     PIGN_Val473Ala                     0.986740    Yes            
+10    PIGN_Met590Leu                     0.985523    Yes            
+11    PIGN_Ala690Ser                     0.985514    Yes            
+12    PIGN_Ala503Val                     0.985009    Yes            
+13    PIGN_His188Tyr                     0.983951    Yes            
+14    PIGN_Pro384Leu                     0.983506    Yes            
+15    PIGN_Trp578Cys                     0.983051    Yes            
+16    PIGN_Asn446Ser                     0.981465    Yes            
+17    PIGN_Phe707Leu                     0.981053    Yes            
+18    PIGN_Val742Phe                     0.980715    Yes            
+19    PIGN_Phe767Leu                     0.980041    Yes            
+20    PIGN_Leu427Pro                     0.978792    Yes            
+21    PIGN_Thr582Ala                     0.978675    Yes            
+22    PIGN_Ser194Phe                     0.977878    Yes            
+23    PIGN_Arg95Gln                      0.977278    Yes            
+24    PIGN_Met901Val                     0.974616    Yes            
+25    PIGN_Asp124Asn                     0.974283    Yes            
+26    PIGN_Arg709Leu                     0.973437    Yes            
+27    PIGN_Ser26Cys                      0.973154    Yes            
+28    PIGN_Lys834Arg                     0.972108    Yes            
+29    PIGN_Gln748Glu                     0.969104    Yes            
+30    PIGN_Arg565His                     0.968350    Yes            
+31    PIGN_Val698Gly                     0.954244    No             
+32    PIGN_Leu841Pro                     0.950157    No             
+33    PIGN_Val477Glu                     0.948707    No             
+34    PIGN_Gly924Ser                     0.945938    No             
+35    PIGN_Val534Ile                     0.945061    Yes            
+36    PIGN_Gly554Arg                     0.944842    No             
+37    PIGN_Ile765Val                     0.943292    No             
+38    PIGN_Met621Lys                     0.937139    No             
+39    PIGN_Ser637Thr                     0.931329    No             
+40    PIGN_Phe825Leu                     0.923056    No             
+41    PIGN_Ser138Arg                     0.920146    No             
+42    PIGN_Leu629Pro                     0.913516    No             
+43    PIGN_Val473Ile                     0.906574    No             
+44    PIGN_Leu383Val                     0.903326    No             
+
+All PIGN Variants (sorted by AGP AUROC):
+----------------------------------------------------------------------------------------------------
+Rank  Variant                            AUROC       Significant    
+----------------------------------------------------------------------------------------------------
+1     PIGN_Ile455Val                     0.996821    ***            
+2     PIGN_Ser859Arg                     0.994208    ***            
+3     PIGN_Arg565Leu                     0.993555    ***            
+4     PIGN_Tyr249Cys                     0.993118    ***            
+5     PIGN_Ala813Thr                     0.992901    ***            
+6     PIGN_Ser135Asn                     0.991486    ***            
+7     PIGN_Phe598Ser                     0.988126    ***            
+8     PIGN_Val417Met                     0.987620    ***            
+9     PIGN_Val473Ala                     0.986740    ***            
+10    PIGN_Met590Leu                     0.985523    ***            
+11    PIGN_Ala690Ser                     0.985514    ***            
+12    PIGN_Ala503Val                     0.985009    ***            
+13    PIGN_His188Tyr                     0.983951    ***            
+14    PIGN_Pro384Leu                     0.983506    ***            
+15    PIGN_Trp578Cys                     0.983051    ***            
+16    PIGN_Asn446Ser                     0.981465    ***            
+17    PIGN_Phe707Leu                     0.981053    ***            
+18    PIGN_Val742Phe                     0.980715    ***            
+19    PIGN_Phe767Leu                     0.980041    ***            
+20    PIGN_Leu427Pro                     0.978792    ***            
+21    PIGN_Thr582Ala                     0.978675    ***            
+22    PIGN_Ser194Phe                     0.977878    ***            
+23    PIGN_Arg95Gln                      0.977278    ***            
+24    PIGN_Met901Val                     0.974616    ***            
+25    PIGN_Asp124Asn                     0.974283    ***            
+26    PIGN_Arg709Leu                     0.973437    ***            
+27    PIGN_Ser26Cys                      0.973154    ***            
+28    PIGN_Lys834Arg                     0.972108    ***            
+29    PIGN_Gln748Glu                     0.969104    ***            
+30    PIGN_Arg565His                     0.968350    ***            
+31    PIGN_Val698Gly                     0.954244    ***            
+32    PIGN_Leu841Pro                     0.950157    ***            
+33    PIGN_Val477Glu                     0.948707    ***            
+34    PIGN_Gly924Ser                     0.945938    ***            
+35    PIGN_Val534Ile                     0.945061    ***            
+36    PIGN_Gly554Arg                     0.944842    ***            
+37    PIGN_Ile765Val                     0.943292    ***            
+38    PIGN_Met621Lys                     0.937139    ***            
+39    PIGN_Ser637Thr                     0.931329    ***            
+40    PIGN_Phe825Leu                     0.923056    ***            
+41    PIGN_Ser138Arg                     0.920146    ***            
+42    PIGN_Leu629Pro                     0.913516    ***            
+43    PIGN_Val473Ile                     0.906574    ***            
+44    PIGN_Leu383Val                     0.903326    ***            
+45    PIGN_Gly755Asp                     0.889662                   
+46    PIGN_Ala161Val                     0.885314                   
+47    PIGN_Asp531Glu                     0.879483                   
+48    PIGN_Gln530Arg                     0.878104                   
+49    PIGN_Leu680Val                     0.877253                   
+50    PIGN_Gly472Asp                     0.874811                   
+51    PIGN_Gly883Ser                     0.870173                   
+52    PIGN_Pro335Leu                     0.867922                   
+53    PIGN_Val242Leu                     0.865592                   
+54    PIGN_Ala405Thr                     0.864876                   
+55    PIGN_Ile686Val                     0.859358                   
+56    PIGN_Thr917Met                     0.857511                   
+57    PIGN_Ser856Leu                     0.855099                   
+58    PIGN_Asn770Ser                     0.854793                   
+59    PIGN_Ala550Thr                     0.853304                   
+60    PIGN_Ser893Arg                     0.853045                   
+61    PIGN_Ser594Arg                     0.849336                   
+62    PIGN_Ala490Val                     0.848246                   
+63    PIGN_Asn313Thr                     0.845809                   
+64    PIGN_Ile744Val                     0.840159                   
+65    PIGN_Asn246Tyr                     0.837318                   
+66    PIGN_Met843Thr                     0.828464                   
+67    PIGN_Tyr769Cys                     0.823174                   
+68    PIGN_Ala56Val                      0.816502                   
+69    PIGN_Ser900Cys                     0.809875                   
+70    PIGN_Glu61Lys                      0.806397                   
+71    PIGN_Glu122Ala                     0.803935                   
+72    PIGN_Ile85Val                      0.803560                   
+73    PIGN_Arg295Ile                     0.800387                   
+74    PIGN_Met832Leu                     0.798953                   
+75    PIGN_Arg221Leu                     0.795578                   
+76    PIGN_Gly250Glu                     0.792102                   
+77    PIGN_Val154Ile                     0.790780                   
+78    PIGN_Val510Ile                     0.786515                   
+79    PIGN_Thr156Ala                     0.781507                   
+80    PIGN_Glu240Val                     0.781082                   
+81    PIGN_Ser823Arg                     0.776914                   
+82    PIGN_Ser535Pro                     0.772742                   
+83    PIGN_Gly217Arg                     0.765906                   
+84    PIGN_Pro71Leu                      0.764994                   
+85    PIGN_Tyr132His                     0.762412                   
+86    PIGN_Asn320Ser                     0.757669                   
+87    PIGN_Lys162Glu                     0.755917                   
+88    PIGN_Val296Ile                     0.754741                   
+89    PIGN_Ala304Val                     0.749029                   
+90    PIGN_Ile804Met                     0.747402                   
+91    PIGN_Val864Ile                     0.743768                   
+92    PIGN_Asp252Tyr                     0.742132                   
+93    PIGN_Leu368Phe                     0.738993                   
+94    PIGN_Tyr438Cys                     0.728118                   
+95    PIGN_Gly104Arg                     0.726918                   
+96    PIGN_His466Tyr                     0.725666                   
+97    PIGN_Ala521Val                     0.724793                   
+98    PIGN_Thr281Ser                     0.720687                   
+99    PIGN_Phe145Leu                     0.709180                   
+100   PIGN_Met328Ile                     0.702104                   
+101   PIGN_Val373Leu                     0.688153                   
+102   PIGN_Val791Phe                     0.683824                   
+103   PIGN_His188Asn                     0.669227                   
+104   PIGN_Asn67Ser                      0.658153                   
+105   PIGN_Ile258Val                     0.657679                   
+106   PIGN_Val879Ala                     0.653462                   
+107   PIGN_His188Pro                     0.648323                   
+108   PIGN_Tyr227His                     0.619459                   
+
+====================================================================================================
+PROTEIN CHANNEL RESULTS
+====================================================================================================
+
+Significant Variants (Protein AUROC > 0.9): 46
+----------------------------------------------------------------------------------------------------
+Rank  Variant                            AUROC       Altered_95th   
+----------------------------------------------------------------------------------------------------
+1     PIGN_Tyr249Cys                     0.994147    Yes            
+2     PIGN_His188Asn                     0.992117    Yes            
+3     PIGN_Ser135Asn                     0.982622    Yes            
+4     PIGN_Ala813Thr                     0.981592    Yes            
+5     PIGN_Asp124Asn                     0.977321    Yes            
+6     PIGN_Arg565Leu                     0.976086    Yes            
+7     PIGN_Trp578Cys                     0.976037    Yes            
+8     PIGN_Gly755Asp                     0.973822    No             
+9     PIGN_Gly217Arg                     0.973189    No             
+10    PIGN_Gly554Arg                     0.973166    Yes            
+11    PIGN_Ser859Arg                     0.972722    Yes            
+12    PIGN_Leu383Val                     0.971653    No             
+13    PIGN_Asn446Ser                     0.969839    Yes            
+14    PIGN_Ala690Ser                     0.968237    No             
+15    PIGN_Leu427Pro                     0.966166    No             
+16    PIGN_Ile455Val                     0.965702    Yes            
+17    PIGN_Arg709Leu                     0.962251    Yes            
+18    PIGN_Asn770Ser                     0.959278    No             
+19    PIGN_Phe707Leu                     0.954650    No             
+20    PIGN_Pro384Leu                     0.954377    No             
+21    PIGN_Phe767Leu                     0.952888    Yes            
+22    PIGN_Met590Leu                     0.951449    No             
+23    PIGN_Phe598Ser                     0.950152    No             
+24    PIGN_Met901Val                     0.950055    No             
+25    PIGN_His188Tyr                     0.949393    No             
+26    PIGN_Lys834Arg                     0.946930    No             
+27    PIGN_Gly924Ser                     0.945152    Yes            
+28    PIGN_Met843Thr                     0.943108    No             
+29    PIGN_Arg565His                     0.938412    No             
+30    PIGN_Arg95Gln                      0.938356    No             
+31    PIGN_Gln748Glu                     0.937750    No             
+32    PIGN_Pro335Leu                     0.937010    No             
+33    PIGN_Ala503Val                     0.934436    No             
+34    PIGN_Val242Leu                     0.933636    No             
+35    PIGN_Val473Ala                     0.927840    No             
+36    PIGN_Thr582Ala                     0.926427    No             
+37    PIGN_Ser194Phe                     0.924285    No             
+38    PIGN_Asn246Tyr                     0.922682    No             
+39    PIGN_Val417Met                     0.918360    No             
+40    PIGN_Asp252Tyr                     0.916132    No             
+41    PIGN_Ala521Val                     0.915940    No             
+42    PIGN_Ser637Thr                     0.913709    No             
+43    PIGN_Met832Leu                     0.913104    No             
+44    PIGN_Leu680Val                     0.912045    No             
+45    PIGN_Leu841Pro                     0.907430    No             
+46    PIGN_Ser856Leu                     0.900253    No             
+
+All PIGN Variants (sorted by Protein AUROC):
+----------------------------------------------------------------------------------------------------
+Rank  Variant                            AUROC       Significant    
+----------------------------------------------------------------------------------------------------
+1     PIGN_Tyr249Cys                     0.994147    ***            
+2     PIGN_His188Asn                     0.992117    ***            
+3     PIGN_Ser135Asn                     0.982622    ***            
+4     PIGN_Ala813Thr                     0.981592    ***            
+5     PIGN_Asp124Asn                     0.977321    ***            
+6     PIGN_Arg565Leu                     0.976086    ***            
+7     PIGN_Trp578Cys                     0.976037    ***            
+8     PIGN_Gly755Asp                     0.973822    ***            
+9     PIGN_Gly217Arg                     0.973189    ***            
+10    PIGN_Gly554Arg                     0.973166    ***            
+11    PIGN_Ser859Arg                     0.972722    ***            
+12    PIGN_Leu383Val                     0.971653    ***            
+13    PIGN_Asn446Ser                     0.969839    ***            
+14    PIGN_Ala690Ser                     0.968237    ***            
+15    PIGN_Leu427Pro                     0.966166    ***            
+16    PIGN_Ile455Val                     0.965702    ***            
+17    PIGN_Arg709Leu                     0.962251    ***            
+18    PIGN_Asn770Ser                     0.959278    ***            
+19    PIGN_Phe707Leu                     0.954650    ***            
+20    PIGN_Pro384Leu                     0.954377    ***            
+21    PIGN_Phe767Leu                     0.952888    ***            
+22    PIGN_Met590Leu                     0.951449    ***            
+23    PIGN_Phe598Ser                     0.950152    ***            
+24    PIGN_Met901Val                     0.950055    ***            
+25    PIGN_His188Tyr                     0.949393    ***            
+26    PIGN_Lys834Arg                     0.946930    ***            
+27    PIGN_Gly924Ser                     0.945152    ***            
+28    PIGN_Met843Thr                     0.943108    ***            
+29    PIGN_Arg565His                     0.938412    ***            
+30    PIGN_Arg95Gln                      0.938356    ***            
+31    PIGN_Gln748Glu                     0.937750    ***            
+32    PIGN_Pro335Leu                     0.937010    ***            
+33    PIGN_Ala503Val                     0.934436    ***            
+34    PIGN_Val242Leu                     0.933636    ***            
+35    PIGN_Val473Ala                     0.927840    ***            
+36    PIGN_Thr582Ala                     0.926427    ***            
+37    PIGN_Ser194Phe                     0.924285    ***            
+38    PIGN_Asn246Tyr                     0.922682    ***            
+39    PIGN_Val417Met                     0.918360    ***            
+40    PIGN_Asp252Tyr                     0.916132    ***            
+41    PIGN_Ala521Val                     0.915940    ***            
+42    PIGN_Ser637Thr                     0.913709    ***            
+43    PIGN_Met832Leu                     0.913104    ***            
+44    PIGN_Leu680Val                     0.912045    ***            
+45    PIGN_Leu841Pro                     0.907430    ***            
+46    PIGN_Ser856Leu                     0.900253    ***            
+47    PIGN_Tyr769Cys                     0.898251                   
+48    PIGN_Val742Phe                     0.898117                   
+49    PIGN_Thr917Met                     0.895206                   
+50    PIGN_Ala490Val                     0.894174                   
+51    PIGN_Ser26Cys                      0.887097                   
+52    PIGN_Asp531Glu                     0.886188                   
+53    PIGN_Ser138Arg                     0.876122                   
+54    PIGN_Phe825Leu                     0.874954                   
+55    PIGN_Leu629Pro                     0.872743                   
+56    PIGN_Ile765Val                     0.870706                   
+57    PIGN_Tyr132His                     0.867208                   
+58    PIGN_Ala56Val                      0.867199                   
+59    PIGN_Ala161Val                     0.864313                   
+60    PIGN_Ile744Val                     0.863049                   
+61    PIGN_Val698Gly                     0.860925                   
+62    PIGN_Asn313Thr                     0.852451                   
+63    PIGN_Ala550Thr                     0.851431                   
+64    PIGN_Gly472Asp                     0.849817                   
+65    PIGN_Val534Ile                     0.847514                   
+66    PIGN_Ser594Arg                     0.846890                   
+67    PIGN_Gln530Arg                     0.844477                   
+68    PIGN_Thr156Ala                     0.844038                   
+69    PIGN_Met621Lys                     0.843859                   
+70    PIGN_Gly104Arg                     0.841775                   
+71    PIGN_Ser893Arg                     0.839035                   
+72    PIGN_Val296Ile                     0.838818                   
+73    PIGN_Val477Glu                     0.837598                   
+74    PIGN_Ser900Cys                     0.835330                   
+75    PIGN_Pro71Leu                      0.834178                   
+76    PIGN_Gly250Glu                     0.832052                   
+77    PIGN_Glu122Ala                     0.828573                   
+78    PIGN_Gly883Ser                     0.821464                   
+79    PIGN_Val154Ile                     0.818453                   
+80    PIGN_Glu61Lys                      0.809857                   
+81    PIGN_Ile85Val                      0.808655                   
+82    PIGN_Arg295Ile                     0.807555                   
+83    PIGN_Ala405Thr                     0.807295                   
+84    PIGN_His188Pro                     0.802550                   
+85    PIGN_Val473Ile                     0.799433                   
+86    PIGN_Val510Ile                     0.793353                   
+87    PIGN_Lys162Glu                     0.792433                   
+88    PIGN_Asn320Ser                     0.781084                   
+89    PIGN_Ser823Arg                     0.771941                   
+90    PIGN_Val864Ile                     0.751522                   
+91    PIGN_Arg221Leu                     0.748219                   
+92    PIGN_Leu368Phe                     0.748008                   
+93    PIGN_Ala304Val                     0.746134                   
+94    PIGN_Met328Ile                     0.735684                   
+95    PIGN_Glu240Val                     0.715770                   
+96    PIGN_Ile804Met                     0.711638                   
+97    PIGN_Tyr438Cys                     0.709259                   
+98    PIGN_Val373Leu                     0.706711                   
+99    PIGN_Val879Ala                     0.700780                   
+100   PIGN_His466Tyr                     0.699676                   
+101   PIGN_Ser535Pro                     0.694359                   
+102   PIGN_Thr281Ser                     0.690589                   
+103   PIGN_Phe145Leu                     0.676723                   
+104   PIGN_Val791Phe                     0.664637                   
+105   PIGN_Asn67Ser                      0.661012                   
+106   PIGN_Ile686Val                     0.642849                   
+107   PIGN_Tyr227His                     0.640798                   
+108   PIGN_Ile258Val                     0.612129                   
+
+====================================================================================================
+MORPH CHANNEL RESULTS
+====================================================================================================
+
+Significant Variants (Morph AUROC > 0.9): 59
+----------------------------------------------------------------------------------------------------
+Rank  Variant                            AUROC       Altered_95th   
+----------------------------------------------------------------------------------------------------
+1     PIGN_Ile455Val                     0.998424    Yes            
+2     PIGN_Ala813Thr                     0.997642    Yes            
+3     PIGN_Pro384Leu                     0.994767    Yes            
+4     PIGN_Arg565Leu                     0.994416    Yes            
+5     PIGN_Tyr249Cys                     0.993083    Yes            
+6     PIGN_Ser859Arg                     0.993060    Yes            
+7     PIGN_Phe598Ser                     0.992139    Yes            
+8     PIGN_Ser135Asn                     0.991631    Yes            
+9     PIGN_Val473Ala                     0.991100    Yes            
+10    PIGN_Val417Met                     0.989612    Yes            
+11    PIGN_Arg95Gln                      0.988837    Yes            
+12    PIGN_Asn446Ser                     0.988572    Yes            
+13    PIGN_Val742Phe                     0.987985    Yes            
+14    PIGN_Ala690Ser                     0.987854    Yes            
+15    PIGN_Ala503Val                     0.987627    Yes            
+16    PIGN_Met590Leu                     0.986751    Yes            
+17    PIGN_Phe707Leu                     0.985422    Yes            
+18    PIGN_Thr582Ala                     0.983420    Yes            
+19    PIGN_Trp578Cys                     0.982012    Yes            
+20    PIGN_Phe767Leu                     0.979738    Yes            
+21    PIGN_Arg565His                     0.979415    Yes            
+22    PIGN_Asp124Asn                     0.977908    Yes            
+23    PIGN_Ser194Phe                     0.976926    Yes            
+24    PIGN_Arg709Leu                     0.975828    Yes            
+25    PIGN_Gln748Glu                     0.975148    Yes            
+26    PIGN_Leu427Pro                     0.974218    Yes            
+27    PIGN_Met901Val                     0.972162    Yes            
+28    PIGN_Ser26Cys                      0.971730    No             
+29    PIGN_Lys834Arg                     0.971530    Yes            
+30    PIGN_Ile765Val                     0.968871    No             
+31    PIGN_Val698Gly                     0.966525    No             
+32    PIGN_His188Tyr                     0.966163    No             
+33    PIGN_Val534Ile                     0.963661    No             
+34    PIGN_Gly924Ser                     0.959703    No             
+35    PIGN_Leu383Val                     0.952564    No             
+36    PIGN_Met621Lys                     0.952290    No             
+37    PIGN_Ala550Thr                     0.945246    No             
+38    PIGN_Val473Ile                     0.944596    No             
+39    PIGN_Val477Glu                     0.944557    No             
+40    PIGN_Gln530Arg                     0.943370    No             
+41    PIGN_Gly472Asp                     0.941358    No             
+42    PIGN_Ser637Thr                     0.940686    No             
+43    PIGN_Leu629Pro                     0.940438    No             
+44    PIGN_Ala490Val                     0.937132    No             
+45    PIGN_Leu841Pro                     0.935934    No             
+46    PIGN_Ser138Arg                     0.933295    No             
+47    PIGN_Gly554Arg                     0.932877    No             
+48    PIGN_Phe825Leu                     0.930608    No             
+49    PIGN_Val242Leu                     0.927542    No             
+50    PIGN_Ser594Arg                     0.923503    No             
+51    PIGN_Ser856Leu                     0.921740    No             
+52    PIGN_Pro335Leu                     0.917095    No             
+53    PIGN_Asn313Thr                     0.913395    No             
+54    PIGN_Asp531Glu                     0.910741    No             
+55    PIGN_Ile686Val                     0.905105    No             
+56    PIGN_Glu122Ala                     0.904826    No             
+57    PIGN_Gly217Arg                     0.902000    No             
+58    PIGN_Arg221Leu                     0.901739    No             
+59    PIGN_Asn246Tyr                     0.900809    No             
+
+All PIGN Variants (sorted by Morph AUROC):
+----------------------------------------------------------------------------------------------------
+Rank  Variant                            AUROC       Significant    
+----------------------------------------------------------------------------------------------------
+1     PIGN_Ile455Val                     0.998424    ***            
+2     PIGN_Ala813Thr                     0.997642    ***            
+3     PIGN_Pro384Leu                     0.994767    ***            
+4     PIGN_Arg565Leu                     0.994416    ***            
+5     PIGN_Tyr249Cys                     0.993083    ***            
+6     PIGN_Ser859Arg                     0.993060    ***            
+7     PIGN_Phe598Ser                     0.992139    ***            
+8     PIGN_Ser135Asn                     0.991631    ***            
+9     PIGN_Val473Ala                     0.991100    ***            
+10    PIGN_Val417Met                     0.989612    ***            
+11    PIGN_Arg95Gln                      0.988837    ***            
+12    PIGN_Asn446Ser                     0.988572    ***            
+13    PIGN_Val742Phe                     0.987985    ***            
+14    PIGN_Ala690Ser                     0.987854    ***            
+15    PIGN_Ala503Val                     0.987627    ***            
+16    PIGN_Met590Leu                     0.986751    ***            
+17    PIGN_Phe707Leu                     0.985422    ***            
+18    PIGN_Thr582Ala                     0.983420    ***            
+19    PIGN_Trp578Cys                     0.982012    ***            
+20    PIGN_Phe767Leu                     0.979738    ***            
+21    PIGN_Arg565His                     0.979415    ***            
+22    PIGN_Asp124Asn                     0.977908    ***            
+23    PIGN_Ser194Phe                     0.976926    ***            
+24    PIGN_Arg709Leu                     0.975828    ***            
+25    PIGN_Gln748Glu                     0.975148    ***            
+26    PIGN_Leu427Pro                     0.974218    ***            
+27    PIGN_Met901Val                     0.972162    ***            
+28    PIGN_Ser26Cys                      0.971730    ***            
+29    PIGN_Lys834Arg                     0.971530    ***            
+30    PIGN_Ile765Val                     0.968871    ***            
+31    PIGN_Val698Gly                     0.966525    ***            
+32    PIGN_His188Tyr                     0.966163    ***            
+33    PIGN_Val534Ile                     0.963661    ***            
+34    PIGN_Gly924Ser                     0.959703    ***            
+35    PIGN_Leu383Val                     0.952564    ***            
+36    PIGN_Met621Lys                     0.952290    ***            
+37    PIGN_Ala550Thr                     0.945246    ***            
+38    PIGN_Val473Ile                     0.944596    ***            
+39    PIGN_Val477Glu                     0.944557    ***            
+40    PIGN_Gln530Arg                     0.943370    ***            
+41    PIGN_Gly472Asp                     0.941358    ***            
+42    PIGN_Ser637Thr                     0.940686    ***            
+43    PIGN_Leu629Pro                     0.940438    ***            
+44    PIGN_Ala490Val                     0.937132    ***            
+45    PIGN_Leu841Pro                     0.935934    ***            
+46    PIGN_Ser138Arg                     0.933295    ***            
+47    PIGN_Gly554Arg                     0.932877    ***            
+48    PIGN_Phe825Leu                     0.930608    ***            
+49    PIGN_Val242Leu                     0.927542    ***            
+50    PIGN_Ser594Arg                     0.923503    ***            
+51    PIGN_Ser856Leu                     0.921740    ***            
+52    PIGN_Pro335Leu                     0.917095    ***            
+53    PIGN_Asn313Thr                     0.913395    ***            
+54    PIGN_Asp531Glu                     0.910741    ***            
+55    PIGN_Ile686Val                     0.905105    ***            
+56    PIGN_Glu122Ala                     0.904826    ***            
+57    PIGN_Gly217Arg                     0.902000    ***            
+58    PIGN_Arg221Leu                     0.901739    ***            
+59    PIGN_Asn246Tyr                     0.900809    ***            
+60    PIGN_Gly755Asp                     0.899882                   
+61    PIGN_Asn770Ser                     0.899507                   
+62    PIGN_Leu680Val                     0.896651                   
+63    PIGN_Val510Ile                     0.894274                   
+64    PIGN_Gly883Ser                     0.892240                   
+65    PIGN_Ile744Val                     0.891671                   
+66    PIGN_Met328Ile                     0.891072                   
+67    PIGN_Ser893Arg                     0.890756                   
+68    PIGN_Thr917Met                     0.881467                   
+69    PIGN_Arg295Ile                     0.880003                   
+70    PIGN_Tyr769Cys                     0.876607                   
+71    PIGN_Met832Leu                     0.870339                   
+72    PIGN_Ala304Val                     0.868981                   
+73    PIGN_Gly250Glu                     0.868495                   
+74    PIGN_Ala161Val                     0.868290                   
+75    PIGN_Ala405Thr                     0.866110                   
+76    PIGN_Asp252Tyr                     0.864794                   
+77    PIGN_Glu61Lys                      0.858719                   
+78    PIGN_Met843Thr                     0.856323                   
+79    PIGN_Asn320Ser                     0.854954                   
+80    PIGN_Glu240Val                     0.854448                   
+81    PIGN_Ile85Val                      0.851161                   
+82    PIGN_Tyr227His                     0.838896                   
+83    PIGN_Ser535Pro                     0.829030                   
+84    PIGN_Tyr132His                     0.825322                   
+85    PIGN_Val296Ile                     0.822018                   
+86    PIGN_Thr156Ala                     0.819366                   
+87    PIGN_Thr281Ser                     0.812083                   
+88    PIGN_Gly104Arg                     0.810871                   
+89    PIGN_Pro71Leu                      0.809244                   
+90    PIGN_Val864Ile                     0.808822                   
+91    PIGN_Tyr438Cys                     0.801050                   
+92    PIGN_Ala521Val                     0.789066                   
+93    PIGN_Leu368Phe                     0.785580                   
+94    PIGN_Phe145Leu                     0.783859                   
+95    PIGN_Ser823Arg                     0.782200                   
+96    PIGN_Ala56Val                      0.781865                   
+97    PIGN_Ile804Met                     0.778918                   
+98    PIGN_Lys162Glu                     0.770311                   
+99    PIGN_Val154Ile                     0.757165                   
+100   PIGN_Ile258Val                     0.729955                   
+101   PIGN_Ser900Cys                     0.729702                   
+102   PIGN_Val373Leu                     0.719592                   
+103   PIGN_His188Pro                     0.683714                   
+104   PIGN_His188Asn                     0.655803                   
+105   PIGN_His466Tyr                     0.650263                   
+106   PIGN_Asn67Ser                      0.646252                   
+107   PIGN_Val791Phe                     0.627215                   
+108   PIGN_Val879Ala                     0.611504                   
+
+====================================================================================================
+CROSS-CHANNEL COMPARISON (Top 30 Variants)
+====================================================================================================
+
+Variant                              DNA       AGP   Protein     Morph      MeanSig_Channels   
+----------------------------------------------------------------------------------------------------
+PIGN_Ala813Thr                    0.9961    0.9929    0.9816    0.9976    0.9921  DAPM           
+PIGN_Ile455Val                    0.9977    0.9968    0.9657    0.9984    0.9897  DAPM           
+PIGN_Tyr249Cys                    0.9771    0.9931    0.9941    0.9931    0.9894  DAPM           
+PIGN_Arg565Leu                    0.9904    0.9936    0.9761    0.9944    0.9886  DAPM           
+PIGN_Ser859Arg                    0.9899    0.9942    0.9727    0.9931    0.9875  DAPM           
+PIGN_Ser135Asn                    0.9815    0.9915    0.9826    0.9916    0.9868  DAPM           
+PIGN_Pro384Leu                    0.9921    0.9835    0.9544    0.9948    0.9812  DAPM           
+PIGN_Ala690Ser                    0.9753    0.9855    0.9682    0.9879    0.9792  DAPM           
+PIGN_Asn446Ser                    0.9745    0.9815    0.9698    0.9886    0.9786  DAPM           
+PIGN_Phe598Ser                    0.9797    0.9881    0.9502    0.9921    0.9775  DAPM           
+PIGN_Trp578Cys                    0.9629    0.9831    0.9760    0.9820    0.9760  DAPM           
+PIGN_Met590Leu                    0.9731    0.9855    0.9514    0.9868    0.9742  DAPM           
+PIGN_Asp124Asn                    0.9663    0.9743    0.9773    0.9779    0.9740  DAPM           
+PIGN_Phe707Leu                    0.9733    0.9811    0.9546    0.9854    0.9736  DAPM           
+PIGN_Val473Ala                    0.9795    0.9867    0.9278    0.9911    0.9713  DAPM           
+PIGN_Leu427Pro                    0.9644    0.9788    0.9662    0.9742    0.9709  DAPM           
+PIGN_Ala503Val                    0.9737    0.9850    0.9344    0.9876    0.9702  DAPM           
+PIGN_Arg95Gln                     0.9746    0.9773    0.9384    0.9888    0.9698  DAPM           
+PIGN_Phe767Leu                    0.9616    0.9800    0.9529    0.9797    0.9686  DAPM           
+PIGN_Val417Met                    0.9779    0.9876    0.9184    0.9896    0.9684  DAPM           
+PIGN_Arg709Leu                    0.9581    0.9734    0.9623    0.9758    0.9674  DAPM           
+PIGN_Thr582Ala                    0.9734    0.9787    0.9264    0.9834    0.9655  DAPM           
+PIGN_His188Tyr                    0.9560    0.9840    0.9494    0.9662    0.9639  DAPM           
+PIGN_Lys834Arg                    0.9620    0.9721    0.9469    0.9715    0.9631  DAPM           
+PIGN_Arg565His                    0.9643    0.9683    0.9384    0.9794    0.9626  DAPM           
+PIGN_Met901Val                    0.9503    0.9746    0.9501    0.9722    0.9618  DAPM           
+PIGN_Ser194Phe                    0.9661    0.9779    0.9243    0.9769    0.9613  DAPM           
+PIGN_Gln748Glu                    0.9565    0.9691    0.9377    0.9751    0.9596  DAPM           
+PIGN_Val742Phe                    0.9706    0.9807    0.8981    0.9880    0.9593  DAM            
+PIGN_Gly924Ser                    0.9437    0.9459    0.9452    0.9597    0.9486  DAPM           
+
+Legend: D=DNA, A=AGP, P=Protein, M=Morph (channels with AUROC > 0.9)

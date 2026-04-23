@@ -1,0 +1,271 @@
+================================================================================
+PIGN VARIANT CLUSTERING SUMMARY PER CHANNEL
+================================================================================
+
+Total variants with cluster assignments: 67
+
+--------------------------------------------------------------------------------
+DNA CHANNEL CLUSTERS
+--------------------------------------------------------------------------------
+Number of clusters: 5
+
+Cluster 1 (14 variants):
+  - PIGN_Pro384Leu                      AUROC: 0.9921
+  - PIGN_Val473Ala                      AUROC: 0.9795
+  - PIGN_Arg95Gln                       AUROC: 0.9746
+  - PIGN_Met590Leu                      AUROC: 0.9731
+  - PIGN_Arg565His                      AUROC: 0.9643
+  - PIGN_Arg709Leu                      AUROC: 0.9581
+  - PIGN_Ser26Cys                       AUROC: 0.9549
+  - PIGN_Val534Ile                      AUROC: 0.9526
+  - PIGN_Gly924Ser                      AUROC: 0.9437
+  - PIGN_Gly472Asp                      AUROC: 0.9240
+  - PIGN_Val477Glu                      AUROC: 0.9239
+  - PIGN_Gln530Arg                      AUROC: 0.9152
+  - PIGN_Leu629Pro                      AUROC: 0.9145
+  - PIGN_Val242Leu                      AUROC: 0.9128
+
+Cluster 2 (13 variants):
+  - PIGN_Ile455Val                      AUROC: 0.9977
+  - PIGN_Ala813Thr                      AUROC: 0.9961
+  - PIGN_Arg565Leu                      AUROC: 0.9904
+  - PIGN_Ser859Arg                      AUROC: 0.9899
+  - PIGN_Ser135Asn                      AUROC: 0.9815
+  - PIGN_Tyr249Cys                      AUROC: 0.9771
+  - PIGN_Ser194Phe                      AUROC: 0.9661
+  - PIGN_Lys834Arg                      AUROC: 0.9620
+  - PIGN_Phe767Leu                      AUROC: 0.9616
+  - PIGN_His188Tyr                      AUROC: 0.9560
+  - PIGN_Met901Val                      AUROC: 0.9503
+  - PIGN_Leu841Pro                      AUROC: 0.9172
+  - PIGN_Gly554Arg                      AUROC: 0.9009
+
+Cluster 3 (10 variants):
+  - PIGN_Phe598Ser                      AUROC: 0.9797
+  - PIGN_Asn446Ser                      AUROC: 0.9745
+  - PIGN_Ala503Val                      AUROC: 0.9737
+  - PIGN_Val742Phe                      AUROC: 0.9706
+  - PIGN_Asp124Asn                      AUROC: 0.9663
+  - PIGN_Trp578Cys                      AUROC: 0.9629
+  - PIGN_Gln748Glu                      AUROC: 0.9565
+  - PIGN_Val698Gly                      AUROC: 0.9495
+  - PIGN_Met621Lys                      AUROC: 0.9477
+  - PIGN_Ser594Arg                      AUROC: 0.9095
+
+Cluster 4 (8 variants):
+  - PIGN_Val417Met                      AUROC: 0.9779
+  - PIGN_Thr582Ala                      AUROC: 0.9734
+  - PIGN_Phe707Leu                      AUROC: 0.9733
+  - PIGN_Ile765Val                      AUROC: 0.9662
+  - PIGN_Leu427Pro                      AUROC: 0.9644
+  - PIGN_Ser637Thr                      AUROC: 0.9241
+  - PIGN_Ser138Arg                      AUROC: 0.9159
+  - PIGN_Val473Ile                      AUROC: 0.9120
+
+Cluster 5 (5 variants):
+  - PIGN_Ala690Ser                      AUROC: 0.9753
+  - PIGN_Leu383Val                      AUROC: 0.9366
+  - PIGN_Ala550Thr                      AUROC: 0.9290
+  - PIGN_Ser856Leu                      AUROC: 0.9172
+  - PIGN_Ala490Val                      AUROC: 0.9168
+
+
+--------------------------------------------------------------------------------
+AGP CHANNEL CLUSTERS
+--------------------------------------------------------------------------------
+Number of clusters: 5
+
+Cluster 1 (16 variants):
+  - PIGN_Phe598Ser                      AUROC: 0.9881
+  - PIGN_Val417Met                      AUROC: 0.9876
+  - PIGN_Val473Ala                      AUROC: 0.9867
+  - PIGN_Trp578Cys                      AUROC: 0.9831
+  - PIGN_Asn446Ser                      AUROC: 0.9815
+  - PIGN_Arg95Gln                       AUROC: 0.9773
+  - PIGN_Asp124Asn                      AUROC: 0.9743
+  - PIGN_Ser26Cys                       AUROC: 0.9732
+  - PIGN_Gln748Glu                      AUROC: 0.9691
+  - PIGN_Arg565His                      AUROC: 0.9683
+  - PIGN_Val698Gly                      AUROC: 0.9542
+  - PIGN_Val477Glu                      AUROC: 0.9487
+  - PIGN_Val534Ile                      AUROC: 0.9451
+  - PIGN_Met621Lys                      AUROC: 0.9371
+  - PIGN_Phe825Leu                      AUROC: 0.9231
+  - PIGN_Leu629Pro                      AUROC: 0.9135
+
+Cluster 2 (9 variants):
+  - PIGN_Ile455Val                      AUROC: 0.9968
+  - PIGN_Ser859Arg                      AUROC: 0.9942
+  - PIGN_Arg565Leu                      AUROC: 0.9936
+  - PIGN_Tyr249Cys                      AUROC: 0.9931
+  - PIGN_Ala813Thr                      AUROC: 0.9929
+  - PIGN_Ser135Asn                      AUROC: 0.9915
+  - PIGN_His188Tyr                      AUROC: 0.9840
+  - PIGN_Phe767Leu                      AUROC: 0.9800
+  - PIGN_Ser194Phe                      AUROC: 0.9779
+
+Cluster 3 (7 variants):
+  - PIGN_Met590Leu                      AUROC: 0.9855
+  - PIGN_Ala690Ser                      AUROC: 0.9855
+  - PIGN_Ala503Val                      AUROC: 0.9850
+  - PIGN_Phe707Leu                      AUROC: 0.9811
+  - PIGN_Val742Phe                      AUROC: 0.9807
+  - PIGN_Arg709Leu                      AUROC: 0.9734
+  - PIGN_Ser637Thr                      AUROC: 0.9313
+
+Cluster 4 (7 variants):
+  - PIGN_Pro384Leu                      AUROC: 0.9835
+  - PIGN_Leu427Pro                      AUROC: 0.9788
+  - PIGN_Thr582Ala                      AUROC: 0.9787
+  - PIGN_Ile765Val                      AUROC: 0.9433
+  - PIGN_Ser138Arg                      AUROC: 0.9201
+  - PIGN_Val473Ile                      AUROC: 0.9066
+  - PIGN_Leu383Val                      AUROC: 0.9033
+
+Cluster 5 (5 variants):
+  - PIGN_Met901Val                      AUROC: 0.9746
+  - PIGN_Lys834Arg                      AUROC: 0.9721
+  - PIGN_Leu841Pro                      AUROC: 0.9502
+  - PIGN_Gly924Ser                      AUROC: 0.9459
+  - PIGN_Gly554Arg                      AUROC: 0.9448
+
+
+--------------------------------------------------------------------------------
+PROTEIN CHANNEL CLUSTERS
+--------------------------------------------------------------------------------
+Number of clusters: 3
+
+Cluster 0 (2 variants):
+  - PIGN_His188Asn                      AUROC: 0.9921
+  - PIGN_Asn770Ser                      AUROC: 0.9593
+
+Cluster 1 (25 variants):
+  - PIGN_Ala813Thr                      AUROC: 0.9816
+  - PIGN_Asp124Asn                      AUROC: 0.9773
+  - PIGN_Arg565Leu                      AUROC: 0.9761
+  - PIGN_Trp578Cys                      AUROC: 0.9760
+  - PIGN_Asn446Ser                      AUROC: 0.9698
+  - PIGN_Leu427Pro                      AUROC: 0.9662
+  - PIGN_Ile455Val                      AUROC: 0.9657
+  - PIGN_Phe707Leu                      AUROC: 0.9546
+  - PIGN_Pro384Leu                      AUROC: 0.9544
+  - PIGN_Phe767Leu                      AUROC: 0.9529
+  - PIGN_Phe598Ser                      AUROC: 0.9502
+  - PIGN_Met901Val                      AUROC: 0.9501
+  - PIGN_His188Tyr                      AUROC: 0.9494
+  - PIGN_Lys834Arg                      AUROC: 0.9469
+  - PIGN_Arg565His                      AUROC: 0.9384
+  - PIGN_Pro335Leu                      AUROC: 0.9370
+  - PIGN_Ala503Val                      AUROC: 0.9344
+  - PIGN_Val242Leu                      AUROC: 0.9336
+  - PIGN_Val473Ala                      AUROC: 0.9278
+  - PIGN_Thr582Ala                      AUROC: 0.9264
+  - PIGN_Ser194Phe                      AUROC: 0.9243
+  - PIGN_Val417Met                      AUROC: 0.9184
+  - PIGN_Asp252Tyr                      AUROC: 0.9161
+  - PIGN_Ser637Thr                      AUROC: 0.9137
+  - PIGN_Leu841Pro                      AUROC: 0.9074
+
+Cluster 2 (11 variants):
+  - PIGN_Gly755Asp                      AUROC: 0.9738
+  - PIGN_Met590Leu                      AUROC: 0.9514
+  - PIGN_Gly924Ser                      AUROC: 0.9452
+  - PIGN_Met843Thr                      AUROC: 0.9431
+  - PIGN_Arg95Gln                       AUROC: 0.9384
+  - PIGN_Gln748Glu                      AUROC: 0.9377
+  - PIGN_Asn246Tyr                      AUROC: 0.9227
+  - PIGN_Ala521Val                      AUROC: 0.9159
+  - PIGN_Met832Leu                      AUROC: 0.9131
+  - PIGN_Leu680Val                      AUROC: 0.9120
+  - PIGN_Ser856Leu                      AUROC: 0.9003
+
+Cluster 3 (8 variants):
+  - PIGN_Tyr249Cys                      AUROC: 0.9941
+  - PIGN_Ser135Asn                      AUROC: 0.9826
+  - PIGN_Gly217Arg                      AUROC: 0.9732
+  - PIGN_Gly554Arg                      AUROC: 0.9732
+  - PIGN_Ser859Arg                      AUROC: 0.9727
+  - PIGN_Leu383Val                      AUROC: 0.9717
+  - PIGN_Ala690Ser                      AUROC: 0.9682
+  - PIGN_Arg709Leu                      AUROC: 0.9623
+
+
+--------------------------------------------------------------------------------
+MORPH CHANNEL CLUSTERS
+--------------------------------------------------------------------------------
+Number of clusters: 7
+
+Cluster 1 (15 variants):
+  - PIGN_Ala813Thr                      AUROC: 0.9976
+  - PIGN_Pro384Leu                      AUROC: 0.9948
+  - PIGN_Phe598Ser                      AUROC: 0.9921
+  - PIGN_Val473Ala                      AUROC: 0.9911
+  - PIGN_Asn446Ser                      AUROC: 0.9886
+  - PIGN_Met590Leu                      AUROC: 0.9868
+  - PIGN_Trp578Cys                      AUROC: 0.9820
+  - PIGN_Arg565His                      AUROC: 0.9794
+  - PIGN_Asp124Asn                      AUROC: 0.9779
+  - PIGN_Ser194Phe                      AUROC: 0.9769
+  - PIGN_Gln748Glu                      AUROC: 0.9751
+  - PIGN_Ser26Cys                       AUROC: 0.9717
+  - PIGN_Val534Ile                      AUROC: 0.9637
+  - PIGN_Val477Glu                      AUROC: 0.9446
+  - PIGN_Ile686Val                      AUROC: 0.9051
+
+Cluster 2 (10 variants):
+  - PIGN_Arg95Gln                       AUROC: 0.9888
+  - PIGN_Val698Gly                      AUROC: 0.9665
+  - PIGN_Gly924Ser                      AUROC: 0.9597
+  - PIGN_Gln530Arg                      AUROC: 0.9434
+  - PIGN_Gly472Asp                      AUROC: 0.9414
+  - PIGN_Leu629Pro                      AUROC: 0.9404
+  - PIGN_Phe825Leu                      AUROC: 0.9306
+  - PIGN_Ser594Arg                      AUROC: 0.9235
+  - PIGN_Pro335Leu                      AUROC: 0.9171
+  - PIGN_Asp531Glu                      AUROC: 0.9107
+
+Cluster 3 (9 variants):
+  - PIGN_Ile455Val                      AUROC: 0.9984
+  - PIGN_Val417Met                      AUROC: 0.9896
+  - PIGN_Val742Phe                      AUROC: 0.9880
+  - PIGN_Ala690Ser                      AUROC: 0.9879
+  - PIGN_Ala503Val                      AUROC: 0.9876
+  - PIGN_Phe707Leu                      AUROC: 0.9854
+  - PIGN_Thr582Ala                      AUROC: 0.9834
+  - PIGN_Leu427Pro                      AUROC: 0.9742
+  - PIGN_Ile765Val                      AUROC: 0.9689
+
+Cluster 4 (7 variants):
+  - PIGN_Arg565Leu                      AUROC: 0.9944
+  - PIGN_Ser859Arg                      AUROC: 0.9931
+  - PIGN_Ser135Asn                      AUROC: 0.9916
+  - PIGN_Leu383Val                      AUROC: 0.9526
+  - PIGN_Ala550Thr                      AUROC: 0.9452
+  - PIGN_Ala490Val                      AUROC: 0.9371
+  - PIGN_Gly217Arg                      AUROC: 0.9020
+
+Cluster 5 (6 variants):
+  - PIGN_Phe767Leu                      AUROC: 0.9797
+  - PIGN_Arg709Leu                      AUROC: 0.9758
+  - PIGN_Met621Lys                      AUROC: 0.9523
+  - PIGN_Val473Ile                      AUROC: 0.9446
+  - PIGN_Ser637Thr                      AUROC: 0.9407
+  - PIGN_Ser138Arg                      AUROC: 0.9333
+
+Cluster 6 (6 variants):
+  - PIGN_Val242Leu                      AUROC: 0.9275
+  - PIGN_Ser856Leu                      AUROC: 0.9217
+  - PIGN_Asn313Thr                      AUROC: 0.9134
+  - PIGN_Glu122Ala                      AUROC: 0.9048
+  - PIGN_Arg221Leu                      AUROC: 0.9017
+  - PIGN_Asn246Tyr                      AUROC: 0.9008
+
+Cluster 7 (6 variants):
+  - PIGN_Tyr249Cys                      AUROC: 0.9931
+  - PIGN_Met901Val                      AUROC: 0.9722
+  - PIGN_Lys834Arg                      AUROC: 0.9715
+  - PIGN_His188Tyr                      AUROC: 0.9662
+  - PIGN_Leu841Pro                      AUROC: 0.9359
+  - PIGN_Gly554Arg                      AUROC: 0.9329
+
+

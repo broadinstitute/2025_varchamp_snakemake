@@ -1,0 +1,248 @@
+PIGN Variant Mislocalization Analysis Report
+============================================================
+
+Batches analyzed: 2026_01_05_Batch_20, 2026_01_05_Batch_21
+Total PIGN variants: 212
+Hits (multichannel 95th): 51
+Hits (multichannel 99th): 14
+
+Top 20 PIGN Variants by AUROC_Mean_Channel:
+------------------------------------------------------------
+Rank  Variant                       AUROC     Hit_95    
+------------------------------------------------------------
+1     PIGN_Arg565Leu                0.9993    Yes       
+2     PIGN_His188Tyr                0.9991    Yes       
+3     PIGN_Ser859Arg                0.9991    Yes       
+4     PIGN_Tyr249Cys                0.9990    Yes       
+5     PIGN_Ser135Asn                0.9987    Yes       
+6     PIGN_Met901Val                0.9980    Yes       
+7     PIGN_Ile455Val                0.9976    Yes       
+8     PIGN_Leu841Pro                0.9976    Yes       
+9     PIGN_Phe767Leu                0.9973    Yes       
+10    PIGN_Lys834Arg                0.9965    Yes       
+11    PIGN_Ala813Thr                0.9923    Yes       
+12    PIGN_Tyr249Cys                0.9885    Yes       
+13    PIGN_Pro384Leu                0.9880    Yes       
+14    PIGN_Gly755Asp                0.9873    No        
+15    PIGN_Pro384Leu                0.9858    Yes       
+16    PIGN_Gly554Arg                0.9841    Yes       
+17    PIGN_Trp578Cys                0.9840    Yes       
+18    PIGN_Ala813Thr                0.9810    Yes       
+19    PIGN_Ala690Ser                0.9810    Yes       
+20    PIGN_Ala503Val                0.9801    Yes       
+
+============================================================
+All PIGN Variants (sorted by AUROC):
+------------------------------------------------------------
+1    PIGN_Arg565Leu                 AUROC: 0.9993  Hit: Yes
+2    PIGN_His188Tyr                 AUROC: 0.9991  Hit: Yes
+3    PIGN_Ser859Arg                 AUROC: 0.9991  Hit: Yes
+4    PIGN_Tyr249Cys                 AUROC: 0.9990  Hit: Yes
+5    PIGN_Ser135Asn                 AUROC: 0.9987  Hit: Yes
+6    PIGN_Met901Val                 AUROC: 0.9980  Hit: Yes
+7    PIGN_Ile455Val                 AUROC: 0.9976  Hit: Yes
+8    PIGN_Leu841Pro                 AUROC: 0.9976  Hit: Yes
+9    PIGN_Phe767Leu                 AUROC: 0.9973  Hit: Yes
+10   PIGN_Lys834Arg                 AUROC: 0.9965  Hit: Yes
+11   PIGN_Ala813Thr                 AUROC: 0.9923  Hit: Yes
+12   PIGN_Tyr249Cys                 AUROC: 0.9885  Hit: Yes
+13   PIGN_Pro384Leu                 AUROC: 0.9880  Hit: Yes
+14   PIGN_Gly755Asp                 AUROC: 0.9873  Hit: No
+15   PIGN_Pro384Leu                 AUROC: 0.9858  Hit: Yes
+16   PIGN_Gly554Arg                 AUROC: 0.9841  Hit: Yes
+17   PIGN_Trp578Cys                 AUROC: 0.9840  Hit: Yes
+18   PIGN_Ala813Thr                 AUROC: 0.9810  Hit: Yes
+19   PIGN_Ala690Ser                 AUROC: 0.9810  Hit: Yes
+20   PIGN_Ala503Val                 AUROC: 0.9801  Hit: Yes
+21   PIGN_Phe707Leu                 AUROC: 0.9790  Hit: Yes
+22   PIGN_Asp124Asn                 AUROC: 0.9787  Hit: Yes
+23   PIGN_Arg565His                 AUROC: 0.9782  Hit: Yes
+24   PIGN_Trp578Cys                 AUROC: 0.9777  Hit: Yes
+25   PIGN_Ala161Val                 AUROC: 0.9769  Hit: Yes
+26   PIGN_Ser135Asn                 AUROC: 0.9762  Hit: Yes
+27   PIGN_Leu427Pro                 AUROC: 0.9753  Hit: No
+28   PIGN_Asn446Ser                 AUROC: 0.9752  Hit: Yes
+29   PIGN_Ser637Thr                 AUROC: 0.9746  Hit: Yes
+30   PIGN_Phe707Leu                 AUROC: 0.9745  Hit: Yes
+31   PIGN_Asn446Ser                 AUROC: 0.9739  Hit: Yes
+32   PIGN_Gly924Ser                 AUROC: 0.9733  Hit: Yes
+33   PIGN_Leu427Pro                 AUROC: 0.9729  Hit: Yes
+34   PIGN_Phe598Ser                 AUROC: 0.9722  Hit: No
+35   PIGN_Thr582Ala                 AUROC: 0.9714  Hit: Yes
+36   PIGN_Arg565Leu                 AUROC: 0.9704  Hit: Yes
+37   PIGN_Ala690Ser                 AUROC: 0.9704  Hit: No
+38   PIGN_Asp124Asn                 AUROC: 0.9702  Hit: Yes
+39   PIGN_Ser859Arg                 AUROC: 0.9697  Hit: Yes
+40   PIGN_Met590Leu                 AUROC: 0.9696  Hit: Yes
+41   PIGN_Arg709Leu                 AUROC: 0.9693  Hit: No
+42   PIGN_Phe598Ser                 AUROC: 0.9678  Hit: Yes
+43   PIGN_Gln748Glu                 AUROC: 0.9658  Hit: Yes
+44   PIGN_Val473Ala                 AUROC: 0.9657  Hit: Yes
+45   PIGN_Asn770Ser                 AUROC: 0.9654  Hit: No
+46   PIGN_Ile455Val                 AUROC: 0.9644  Hit: Yes
+47   PIGN_Val417Met                 AUROC: 0.9642  Hit: No
+48   PIGN_Val417Met                 AUROC: 0.9637  Hit: Yes
+49   PIGN_Val742Phe                 AUROC: 0.9623  Hit: No
+50   PIGN_Met590Leu                 AUROC: 0.9608  Hit: No
+51   PIGN_Gly755Asp                 AUROC: 0.9597  Hit: No
+52   PIGN_Val242Leu                 AUROC: 0.9594  Hit: Yes
+53   PIGN_Ser194Phe                 AUROC: 0.9583  Hit: No
+54   PIGN_Arg709Leu                 AUROC: 0.9579  Hit: Yes
+55   PIGN_Ser900Cys                 AUROC: 0.9556  Hit: No
+56   PIGN_Val698Gly                 AUROC: 0.9545  Hit: Yes
+57   PIGN_Arg95Gln                  AUROC: 0.9544  Hit: No
+58   PIGN_Arg95Gln                  AUROC: 0.9537  Hit: Yes
+59   PIGN_Ala550Thr                 AUROC: 0.9509  Hit: No
+60   PIGN_Val477Glu                 AUROC: 0.9492  Hit: No
+61   PIGN_Met621Lys                 AUROC: 0.9488  Hit: Yes
+62   PIGN_Ala490Val                 AUROC: 0.9453  Hit: No
+63   PIGN_Leu629Pro                 AUROC: 0.9439  Hit: Yes
+64   PIGN_Ile765Val                 AUROC: 0.9436  Hit: No
+65   PIGN_Ser194Phe                 AUROC: 0.9421  Hit: Yes
+66   PIGN_Val473Ala                 AUROC: 0.9405  Hit: No
+67   PIGN_Gly472Asp                 AUROC: 0.9397  Hit: Yes
+68   PIGN_Ala503Val                 AUROC: 0.9392  Hit: No
+69   PIGN_Arg565His                 AUROC: 0.9377  Hit: No
+70   PIGN_Val154Ile                 AUROC: 0.9376  Hit: No
+71   PIGN_Phe767Leu                 AUROC: 0.9373  Hit: Yes
+72   PIGN_Ser138Arg                 AUROC: 0.9370  Hit: Yes
+73   PIGN_Thr582Ala                 AUROC: 0.9367  Hit: No
+74   PIGN_Ile744Val                 AUROC: 0.9354  Hit: No
+75   PIGN_Gly554Arg                 AUROC: 0.9351  Hit: No
+76   PIGN_His188Tyr                 AUROC: 0.9348  Hit: No
+77   PIGN_Gln748Glu                 AUROC: 0.9318  Hit: No
+78   PIGN_Asp531Glu                 AUROC: 0.9312  Hit: No
+79   PIGN_Met901Val                 AUROC: 0.9276  Hit: No
+80   PIGN_Leu680Val                 AUROC: 0.9269  Hit: No
+81   PIGN_Pro335Leu                 AUROC: 0.9243  Hit: No
+82   PIGN_Lys834Arg                 AUROC: 0.9236  Hit: No
+83   PIGN_Ser26Cys                  AUROC: 0.9234  Hit: No
+84   PIGN_Gly924Ser                 AUROC: 0.9234  Hit: No
+85   PIGN_Ser26Cys                  AUROC: 0.9232  Hit: No
+86   PIGN_Ser893Arg                 AUROC: 0.9224  Hit: No
+87   PIGN_Ser594Arg                 AUROC: 0.9180  Hit: No
+88   PIGN_Val534Ile                 AUROC: 0.9179  Hit: No
+89   PIGN_Gln530Arg                 AUROC: 0.9160  Hit: No
+90   PIGN_Val742Phe                 AUROC: 0.9131  Hit: No
+91   PIGN_Gly104Arg                 AUROC: 0.9124  Hit: No
+92   PIGN_Thr917Met                 AUROC: 0.9107  Hit: No
+93   PIGN_Ala521Val                 AUROC: 0.9105  Hit: No
+94   PIGN_Ile765Val                 AUROC: 0.9089  Hit: No
+95   PIGN_Phe825Leu                 AUROC: 0.9053  Hit: No
+96   PIGN_Ala56Val                  AUROC: 0.9049  Hit: No
+97   PIGN_Met843Thr                 AUROC: 0.9002  Hit: No
+98   PIGN_Asn246Tyr                 AUROC: 0.8998  Hit: No
+99   PIGN_Ser138Arg                 AUROC: 0.8994  Hit: No
+100  PIGN_Ala405Thr                 AUROC: 0.8992  Hit: No
+101  PIGN_Gly883Ser                 AUROC: 0.8963  Hit: No
+102  PIGN_Val296Ile                 AUROC: 0.8944  Hit: No
+103  PIGN_Met328Ile                 AUROC: 0.8909  Hit: No
+104  PIGN_Phe825Leu                 AUROC: 0.8886  Hit: No
+105  PIGN_Ser856Leu                 AUROC: 0.8878  Hit: No
+106  PIGN_Pro71Leu                  AUROC: 0.8851  Hit: No
+107  PIGN_Asp252Tyr                 AUROC: 0.8822  Hit: No
+108  PIGN_Glu61Lys                  AUROC: 0.8822  Hit: No
+109  PIGN_Ala304Val                 AUROC: 0.8774  Hit: No
+110  PIGN_Met843Thr                 AUROC: 0.8771  Hit: No
+111  PIGN_Glu122Ala                 AUROC: 0.8767  Hit: No
+112  PIGN_Met832Leu                 AUROC: 0.8759  Hit: No
+113  PIGN_Pro335Leu                 AUROC: 0.8757  Hit: No
+114  PIGN_His466Tyr                 AUROC: 0.8743  Hit: No
+115  PIGN_Thr156Ala                 AUROC: 0.8677  Hit: No
+116  PIGN_Tyr769Cys                 AUROC: 0.8674  Hit: No
+117  PIGN_Val879Ala                 AUROC: 0.8669  Hit: No
+118  PIGN_Ser856Leu                 AUROC: 0.8656  Hit: No
+119  PIGN_Asn313Thr                 AUROC: 0.8651  Hit: No
+120  PIGN_Leu841Pro                 AUROC: 0.8611  Hit: No
+121  PIGN_Arg295Ile                 AUROC: 0.8582  Hit: No
+122  PIGN_Ser637Thr                 AUROC: 0.8566  Hit: No
+123  PIGN_Leu680Val                 AUROC: 0.8557  Hit: No
+124  PIGN_Glu122Ala                 AUROC: 0.8557  Hit: No
+125  PIGN_Met832Leu                 AUROC: 0.8544  Hit: No
+126  PIGN_Val473Ile                 AUROC: 0.8512  Hit: No
+127  PIGN_Asn246Tyr                 AUROC: 0.8498  Hit: No
+128  PIGN_Val534Ile                 AUROC: 0.8497  Hit: No
+129  PIGN_Arg295Ile                 AUROC: 0.8483  Hit: No
+130  PIGN_Arg221Leu                 AUROC: 0.8473  Hit: No
+131  PIGN_Val373Leu                 AUROC: 0.8467  Hit: No
+132  PIGN_Tyr769Cys                 AUROC: 0.8464  Hit: No
+133  PIGN_Asn313Thr                 AUROC: 0.8450  Hit: No
+134  PIGN_Ile686Val                 AUROC: 0.8441  Hit: No
+135  PIGN_Thr917Met                 AUROC: 0.8438  Hit: No
+136  PIGN_Val242Leu                 AUROC: 0.8383  Hit: No
+137  PIGN_Tyr132His                 AUROC: 0.8378  Hit: No
+138  PIGN_Val473Ile                 AUROC: 0.8367  Hit: No
+139  PIGN_Val698Gly                 AUROC: 0.8365  Hit: No
+140  PIGN_Asn770Ser                 AUROC: 0.8363  Hit: No
+141  PIGN_His188Asn                 AUROC: 0.8338  Hit: No
+142  PIGN_Gly250Glu                 AUROC: 0.8331  Hit: No
+143  PIGN_Val477Glu                 AUROC: 0.8287  Hit: No
+144  PIGN_His188Asn                 AUROC: 0.8270  Hit: No
+145  PIGN_Leu368Phe                 AUROC: 0.8251  Hit: No
+146  PIGN_Leu629Pro                 AUROC: 0.8185  Hit: No
+147  PIGN_Met621Lys                 AUROC: 0.8184  Hit: No
+148  PIGN_His188Pro                 AUROC: 0.8156  Hit: No
+149  PIGN_Asp531Glu                 AUROC: 0.8148  Hit: No
+150  PIGN_Val510Ile                 AUROC: 0.8146  Hit: No
+151  PIGN_Thr156Ala                 AUROC: 0.8134  Hit: No
+152  PIGN_Tyr132His                 AUROC: 0.8130  Hit: No
+153  PIGN_Ile85Val                  AUROC: 0.8094  Hit: No
+154  PIGN_Phe145Leu                 AUROC: 0.8083  Hit: No
+155  PIGN_Gly250Glu                 AUROC: 0.8041  Hit: No
+156  PIGN_Asn320Ser                 AUROC: 0.8015  Hit: No
+157  PIGN_Ser823Arg                 AUROC: 0.8006  Hit: No
+158  PIGN_Lys162Glu                 AUROC: 0.7982  Hit: No
+159  PIGN_Asn320Ser                 AUROC: 0.7981  Hit: No
+160  PIGN_Tyr438Cys                 AUROC: 0.7976  Hit: No
+161  PIGN_Ile85Val                  AUROC: 0.7959  Hit: No
+162  PIGN_Gly883Ser                 AUROC: 0.7946  Hit: No
+163  PIGN_Ala56Val                  AUROC: 0.7943  Hit: No
+164  PIGN_Ser893Arg                 AUROC: 0.7912  Hit: No
+165  PIGN_Val510Ile                 AUROC: 0.7908  Hit: No
+166  PIGN_Val864Ile                 AUROC: 0.7884  Hit: No
+167  PIGN_Glu61Lys                  AUROC: 0.7820  Hit: No
+168  PIGN_Gln530Arg                 AUROC: 0.7804  Hit: No
+169  PIGN_Ala161Val                 AUROC: 0.7778  Hit: No
+170  PIGN_Ser823Arg                 AUROC: 0.7693  Hit: No
+171  PIGN_Asp252Tyr                 AUROC: 0.7685  Hit: No
+172  PIGN_Gly472Asp                 AUROC: 0.7684  Hit: No
+173  PIGN_Asn67Ser                  AUROC: 0.7680  Hit: No
+174  PIGN_Ser594Arg                 AUROC: 0.7648  Hit: No
+175  PIGN_Ile258Val                 AUROC: 0.7618  Hit: No
+176  PIGN_Ala550Thr                 AUROC: 0.7618  Hit: No
+177  PIGN_Glu240Val                 AUROC: 0.7589  Hit: No
+178  PIGN_Glu240Val                 AUROC: 0.7500  Hit: No
+179  PIGN_Lys162Glu                 AUROC: 0.7475  Hit: No
+180  PIGN_Ala490Val                 AUROC: 0.7447  Hit: No
+181  PIGN_Ala405Thr                 AUROC: 0.7439  Hit: No
+182  PIGN_Ile744Val                 AUROC: 0.7435  Hit: No
+183  PIGN_Pro71Leu                  AUROC: 0.7417  Hit: No
+184  PIGN_Ser535Pro                 AUROC: 0.7352  Hit: No
+185  PIGN_Ile804Met                 AUROC: 0.7333  Hit: No
+186  PIGN_Val154Ile                 AUROC: 0.7301  Hit: No
+187  PIGN_Ile804Met                 AUROC: 0.7296  Hit: No
+188  PIGN_Ser535Pro                 AUROC: 0.7259  Hit: No
+189  PIGN_Ala521Val                 AUROC: 0.7211  Hit: No
+190  PIGN_Val296Ile                 AUROC: 0.7158  Hit: No
+191  PIGN_Val864Ile                 AUROC: 0.7133  Hit: No
+192  PIGN_Thr281Ser                 AUROC: 0.7126  Hit: No
+193  PIGN_Thr281Ser                 AUROC: 0.7018  Hit: No
+194  PIGN_Ser900Cys                 AUROC: 0.6996  Hit: No
+195  PIGN_Val791Phe                 AUROC: 0.6943  Hit: No
+196  PIGN_Val791Phe                 AUROC: 0.6746  Hit: No
+197  PIGN_Gly104Arg                 AUROC: 0.6727  Hit: No
+198  PIGN_Arg221Leu                 AUROC: 0.6633  Hit: No
+199  PIGN_His188Pro                 AUROC: 0.6622  Hit: No
+200  PIGN_Tyr227His                 AUROC: 0.6580  Hit: No
+201  PIGN_Ala304Val                 AUROC: 0.6500  Hit: No
+202  PIGN_Leu368Phe                 AUROC: 0.6497  Hit: No
+203  PIGN_Phe145Leu                 AUROC: 0.6358  Hit: No
+204  PIGN_Tyr227His                 AUROC: 0.6266  Hit: No
+205  PIGN_Ile686Val                 AUROC: 0.6091  Hit: No
+206  PIGN_Asn67Ser                  AUROC: 0.5971  Hit: No
+207  PIGN_Ile258Val                 AUROC: 0.5655  Hit: No
+208  PIGN_His466Tyr                 AUROC: 0.5647  Hit: No
+209  PIGN_Met328Ile                 AUROC: 0.5610  Hit: No
+210  PIGN_Val373Leu                 AUROC: 0.5352  Hit: No
+211  PIGN_Val879Ala                 AUROC: 0.5042  Hit: No
+212  PIGN_Tyr438Cys                 AUROC: 0.4708  Hit: No
